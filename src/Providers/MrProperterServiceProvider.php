@@ -3,8 +3,8 @@
 namespace MrProperter\Providers;
 
 use Illuminate\Support\ServiceProvider;
-use MrProperter\Console\Commands\ExampleCommand;
-use MrProperter\Console\Commands\MakePackage;
+use MrProperter\Console\Commands\MakeMigration;
+use MrProperter\Console\Commands\MakeModel;
 
 class MrProperterServiceProvider extends ServiceProvider
 {
@@ -29,8 +29,8 @@ class MrProperterServiceProvider extends ServiceProvider
 
         if ($this->app->runningInConsole()) {
             $this->commands([
-                ExampleCommand::class,
-                
+                MakeModel::class,
+                MakeMigration::class,
             ]);
         }
 

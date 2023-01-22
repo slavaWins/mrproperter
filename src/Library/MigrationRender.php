@@ -4,6 +4,8 @@ namespace MrProperter\Library;
 
 use App\Models\PropertyBuilder\MPModel;
 use App\Models\User;
+use Illuminate\Database\Migrations\MigrationCreator;
+use Illuminate\Support\Str;
 
 class MigrationRender
 {
@@ -72,9 +74,23 @@ class MigrationRender
             $list[$ind] = $data;
         }
 
-        $tableName =  $model->getTable();
-        $view = view("mrproperter::migration", ['list' => $list, 'tableName' => $tableName]);
-        $view = nl2br($view);
+
+        $tableName = $model->getTable();
+        $modelName = basename(get_class($model));
+        $className = "Table" . $modelName . 'Create';
+
+
+        $fileName = Str::snake($className);
+        $fileName = str_replace($modelName, $tableName, $fileName);
+        $fileName = date('Y_m_d_His') . '_' . $fileName . '.php';
+
+
+        $view = view("mrproperter::migration", ['list' => $list, 'tableName' => $tableName, 'className' => $className]);
+        return [
+            'content' => $view,
+            'file' => $fileName,
+            'class' => $className,
+        ];
         return $view . ' ';
     }
 
