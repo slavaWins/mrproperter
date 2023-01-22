@@ -12,16 +12,15 @@
 composer require slavawins/mrproperter
 ```
 
- Опубликовать js файлы, вью и миграции необходимые для работы пакета.
-Вызывать команду:
+ Опубликовать комндой Контроллер с примером использования:
 ```
 php artisan vendor:publish --provider="MrProperter\Providers\MrProperterServiceProvider"
 ``` 
 
- В роутере routes/web.php удалить:
- добавить
+ В роутере routes/web.php  добавить
  ```
-    \MrProperter\Library\MrProperterRoute::routes();
+    Route::get('/mr-properter', [\App\Http\Controllers\MrProperter\MrProperterController::class, 'index'])->name('mrproperter.index');
+    Route::post('/mr-properter', [\App\Http\Controllers\MrProperter\MrProperterController::class, 'store'])->name('mrproperter.store');
  ```
 
 Выполнить миграцию
