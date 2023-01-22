@@ -9,7 +9,7 @@ use MrProperter\Library\PropertyBuilderStructure;
 class TemplateModel extends MPModel
 {
 
-    public function GetPropertys()
+    public function GetProperties()
     {
         return [
             'selector_character_enabled' => PropertyBuilderStructure::Checkbox("Селектор чарактера")

@@ -51,7 +51,7 @@ class FormBuilderStructure
 
     public function Input($ind)
     {
-        $props = $this->model->GetPropertys();
+        $props = $this->model->GetProperties();
         if (!isset($props[$ind])) return $this;
 
         $this->row_list[$this->row_id][$ind] = true;

@@ -28,7 +28,7 @@ class MPModel extends Model
          * @var PropertyBuilderStructure $prop
          */
         foreach ($props as $K => $prop) {
-            $text = Library\MigrationRender::GetType( $prop->typeData);
+            $text = Library\MigrationRender::GetType($prop->typeData);
             if ($prop->max) $text .= "|max:" . $prop->max;
             if ($prop->min) $text .= "|min:" . $prop->min;
             $rules[$K] = $text;
@@ -44,8 +44,8 @@ class MPModel extends Model
     public function GetByTag($tag = null)
     {
 
-        if(!$tag)return $this->GetPropertys();
-        return collect($this->GetPropertys())->filter(function (Library\PropertyBuilderStructure $e) use ($tag) {
+        if (!$tag) return $this->GetProperties();
+        return collect($this->GetProperties())->filter(function (Library\PropertyBuilderStructure $e) use ($tag) {
             if ($tag == null) return true;
             if (isset($e->tags[$tag])) return true;
             return false;
@@ -54,7 +54,7 @@ class MPModel extends Model
 
     public function BuildInputAll($tag = null)
     {
-        $p = $this->GetPropertys();
+        $p = $this->GetProperties();
 
         $html = "";
         foreach ($this->toArray() as $K => $V) {
@@ -70,7 +70,7 @@ class MPModel extends Model
 
     public function BuildInput($ind)
     {
-        $p = $this->GetPropertys();
+        $p = $this->GetProperties();
         if (!isset($p[$ind])) return null;
         $prop = $p[$ind];
 
@@ -84,11 +84,11 @@ class MPModel extends Model
             $inp = FElement::NewInputText()->SetView()->InputBoolRow();
         } elseif ($prop->typeData == "text" or $prop->typeData == "int") {
             $inp = FElement::NewInputText();
-        } elseif ($prop->typeData == "select" ) {
+        } elseif ($prop->typeData == "select") {
             $inp = FElement::NewInputText()->SetView()->InputSelect()->AddOptionFromArray($prop->options);
         }
 
-        $inp =$inp
+        $inp = $inp
             ->SetLabel($prop->name)
             ->SetPlaceholder($prop->descr ?? null)
             ->SetName($ind)
@@ -106,7 +106,7 @@ class MPModel extends Model
     /**
      * @return PropertyBuilderStructure[]
      */
-    public function GetPropertys()
+    public function GetProperties()
     {
         return [
             'name' => PropertyBuilderStructure::New("Название")

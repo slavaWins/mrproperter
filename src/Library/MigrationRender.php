@@ -22,7 +22,7 @@ class MigrationRender
     public static function RenderDoc(\MrProperter\Models\MPModel $model)
     {
         $list = [];
-        $inputs = $model->GetPropertys();
+        $inputs = $model->GetProperties();
 
         $text = "/**";
         foreach ($inputs as $ind => $prop) {
@@ -44,7 +44,7 @@ class MigrationRender
     public static function RenderMigration(\MrProperter\Models\MPModel $model, $ignoreKey = [], $isModify = false)
     {
         $list = [];
-        $inputs = $model->GetPropertys();
+        $inputs = $model->GetProperties();
 
         foreach ($inputs as $ind => $prop) {
             if (isset($ignoreKey[$ind] ) or in_array( $ind, $ignoreKey)) continue;
