@@ -2,11 +2,13 @@
 
 namespace MrProperter\Console\Commands;
 
+use Illuminate\Support\Facades\Schema;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\File;
 use MrProperter\Library\MigrationRender;
 use MrProperter\Models\MPModel;
+use Illuminate\Support\Facades\DB;
 
 class MakeMigration extends Command
 {
@@ -41,7 +43,7 @@ class MakeMigration extends Command
             }
             if ($emptyLines > 1) continue;
 
-            if (substr($V, -1) == "}") $opens -= 1;
+            if (substr($V, -1) == "}" || substr($V, -3) == '});') $opens -= 1;
 
             $text .= "\n";
             if ($opens > 0) $text .= str_repeat("    ", $opens);
@@ -51,6 +53,16 @@ class MakeMigration extends Command
         }
         $text = trim($text);
         return $text;
+    }
+
+
+
+    public static function FixView($content)
+    {
+        $content = html_entity_decode($content);
+        $content = self::CodeFormater($content);
+        $content = str_replace("   ->", '->', $content);
+        return $content;
     }
 
     public function handle()
@@ -65,14 +77,23 @@ class MakeMigration extends Command
         /** @var MPModel $class */
         $class = new $cln();
 
-        $info = MigrationRender::RenderMigration($class);
+        $info = MigrationRender::RenderMigration($class );
+
+        $keys = Schema::getConnection()->getSchemaBuilder()->getColumnListing($info['table']);
+
+        $keyList =[];
+        foreach ($keys as $V)$keyList[$V]=true;
+        $info = MigrationRender::RenderMigration($class, $keyList, !empty($keys) );
+
+
+
+
 
 
         $path = database_path() . '/migrations/' . $info['file'];
 
-        $content = '<?php'."\n".$info['content'];
-        $content = html_entity_decode($content);
-        $content = self::CodeFormater($content);
+        $content = '<?php' . "\n" . $info['content'];
+        $content = self::FixView($content);
 
         file_put_contents($path, $content);
 

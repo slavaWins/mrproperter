@@ -41,12 +41,13 @@ class MigrationRender
         return $text . ' ';
     }
 
-    public static function RenderMigration(\MrProperter\Models\MPModel $model)
+    public static function RenderMigration(\MrProperter\Models\MPModel $model, $ignoreKey = [], $isModify = false)
     {
         $list = [];
         $inputs = $model->GetPropertys();
 
         foreach ($inputs as $ind => $prop) {
+            if (isset($ignoreKey[$ind] ) or in_array( $ind, $ignoreKey)) continue;
             $data = [];
 
             $data[self::GetType($prop->typeData)] = $ind;
@@ -77,19 +78,23 @@ class MigrationRender
 
         $tableName = $model->getTable();
         $modelName = basename(get_class($model));
-        $className = "Table" . $modelName . 'Create';
 
+        $className = "able_" . $tableName;
+        if($isModify)$className.="_modify";
+        if(!$isModify)$className.="_create";
+        $className = "T" . Str::camel($className);
 
         $fileName = Str::snake($className);
         $fileName = str_replace($modelName, $tableName, $fileName);
         $fileName = date('Y_m_d_His') . '_' . $fileName . '.php';
 
 
-        $view = view("mrproperter::migration", ['list' => $list, 'tableName' => $tableName, 'className' => $className]);
+        $view = view("mrproperter::migration", ['list' => $list, 'tableName' => $tableName, 'className' => $className,'isModify'=>$isModify]);
         return [
             'content' => $view,
             'file' => $fileName,
             'class' => $className,
+            'table' => $tableName,
         ];
         return $view . ' ';
     }
