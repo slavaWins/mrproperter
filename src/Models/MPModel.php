@@ -13,6 +13,9 @@ use SlavaWins\Formbuilder\Library\FElement;
 class MPModel extends Model
 {
 
+    public function PropertiesSetting(){
+
+    }
 
     public static function GetValidateRules($tag = null)
     {
@@ -89,10 +92,11 @@ class MPModel extends Model
         }
 
         $inp = $inp
-            ->SetLabel($prop->name)
+            ->SetLabel( $prop->label ?? $prop->name ?? "na")
             ->SetPlaceholder($prop->descr ?? null)
             ->SetName($ind)
             ->SetDescr($prop->descr ?? null); //->FrontendValidate()->String(0, 75)
+
 
         if ($prop->typeData == "string") {
             $inp->FrontendValidate()->String($prop->min, $prop->max ?? 999999);
@@ -103,16 +107,16 @@ class MPModel extends Model
 
     }
 
+    private $propertestConfig;
     /**
      * @return PropertyBuilderStructure[]
      */
     public function GetProperties()
     {
-        return [
-            'name' => PropertyBuilderStructure::New("Название")
-                ->SetDescr("Описание поля")->SetIcon("🌟"),
-            'className' => PropertyBuilderStructure::New("Название класса")->SetDescr("Описание поля")->SetIcon("🌟"),
-        ];
+        if($this->propertestConfig)return $this->propertestConfig;
+        $this->propertestConfig=$this->PropertiesSetting();
+        return $this->propertestConfig;
+
     }
 
 }

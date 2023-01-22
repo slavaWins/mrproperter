@@ -45,6 +45,12 @@ class PropertyConfigStructure
      */
     public function GetConfig()
     {
+        $mta = $this->model->toArray();
+        foreach ($this->list as $K => $V) {
+            if (isset($mta->$K)) {
+                $V->value = $mta->$K;
+            }
+        }
 
         return $this->list;
     }
