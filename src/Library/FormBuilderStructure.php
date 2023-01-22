@@ -27,8 +27,16 @@ class FormBuilderStructure
      * @return PropertyBuilderStructure
      */
 
-    public static function New(MPModel $model)
+    /**
+     * @param MPModel $model
+     * @return FormBuilderStructure
+     * @throws \Exception
+     */
+    public static function New(  $model)
     {
+        if(!$model){
+            throw new \Exception("Поле модель пустое. Нужно передать реальную модель!");
+        }
         $s = new FormBuilderStructure();
         $s->model = $model;
         return $s;
