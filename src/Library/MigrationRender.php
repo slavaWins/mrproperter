@@ -31,9 +31,9 @@ class MigrationRender
             $text .= "\n * @property " . self::GetType($prop->typeData);
 
             if (!$prop->default) $text .= "|null";
-            $text .= '$' . $ind;
+            $text .= ' $' . $ind;
 
-            if ($prop->comment || $prop->descr) $text .= $prop->comment ?? $prop->descr;
+            if ($prop->comment || $prop->descr) $text .= " ". ($prop->comment ?? $prop->descr);
 
         }
         $text .= "\n" . '*/';

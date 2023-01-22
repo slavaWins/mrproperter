@@ -4,6 +4,7 @@ namespace MrProperter\Providers;
 
 use Illuminate\Support\ServiceProvider;
 use MrProperter\Console\Commands\MakeMigration;
+use MrProperter\Console\Commands\MakeDoc;
 use MrProperter\Console\Commands\MakeModel;
 
 class MrProperterServiceProvider extends ServiceProvider
@@ -29,6 +30,7 @@ class MrProperterServiceProvider extends ServiceProvider
 
         if ($this->app->runningInConsole()) {
             $this->commands([
+                MakeDoc::class,
                 MakeModel::class,
                 MakeMigration::class,
             ]);
