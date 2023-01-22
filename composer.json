@@ -1,0 +1,28 @@
+{
+    "name": "slavawins/mrproperter",
+    "description": "Expa",
+    "minimum-stability": "stable",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "slavaWins",
+            "email": "email@example.com",
+            "homepage": "https://github.com/slavaWins/mrproperter"
+        }
+    ],
+    "require": {
+        "php": "^7.3|^8.0"
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "MrProperter\\Providers\\MrProperterServiceProvider"
+            ]
+        }
+    },
+    "autoload": {
+        "psr-4": {
+            "MrProperter\\": "src"
+        }
+    }
+}
