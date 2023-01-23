@@ -10,8 +10,7 @@ use MrProperter\Library\MigrationRender;
 use MrProperter\Models\MPModel;
 use Illuminate\Support\Facades\DB;
 
-class MakeMigration extends Command
-{
+class MakeMigration extends Command {
     /**
      * The name and signature of the console command.
      *
@@ -26,8 +25,7 @@ class MakeMigration extends Command
      */
     protected $description = 'Создать модель';
 
-    public static function CodeFormater($f)
-    {
+    public static function CodeFormater( $f ) {
         $text = "";
         $opens = 0;
         $emptyLines = 0;
@@ -56,17 +54,14 @@ class MakeMigration extends Command
     }
 
 
-
-    public static function FixView($content)
-    {
+    public static function FixView( $content ) {
         $content = html_entity_decode($content);
         $content = self::CodeFormater($content);
         $content = str_replace("   ->", '->', $content);
         return $content;
     }
 
-    public function handle()
-    {
+    public function handle() {
         $name = $this->argument("Model");
 
         $pTo = MakeModel::GetModelPath($name);
@@ -76,18 +71,17 @@ class MakeMigration extends Command
 
         /** @var MPModel $class */
         $class = new $cln();
-
-        $info = MigrationRender::RenderMigration($class );
-
-        $keys = Schema::getConnection()->getSchemaBuilder()->getColumnListing($info['table']);
-
-        $keyList =[];
-        foreach ($keys as $V)$keyList[$V]=true;
-        $info = MigrationRender::RenderMigration($class, $keyList, !empty($keys) );
+        $tableName = $class->getTable();
 
 
+        $keys = Schema::getConnection()->getSchemaBuilder()->getColumnListing($tableName);
+        $keyList = [];
+        foreach ($keys as $V) $keyList[$V] = true;
+
+        $info = MigrationRender::RenderMigration($class, $keyList, !empty($keys));
 
 
+        if (!$info['content']) return $this->error("Not new collums in model");
 
 
         $path = database_path() . '/migrations/' . $info['file'];

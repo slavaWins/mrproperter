@@ -7,11 +7,9 @@ use App\Models\User;
 use Illuminate\Database\Migrations\MigrationCreator;
 use Illuminate\Support\Str;
 
-class MigrationRender
-{
+class MigrationRender {
 
-    public static function GetType($type)
-    {
+    public static function GetType( $type ) {
         if ($type == "int") return "integer";
         if ($type == "string") return 'string';
         if ($type == "select") return 'string';
@@ -19,21 +17,20 @@ class MigrationRender
         return 'string';
     }
 
-    public static function RenderDoc(\MrProperter\Models\MPModel $model)
-    {
+    public static function RenderDoc( \MrProperter\Models\MPModel $model ) {
         $list = [];
         $inputs = $model->GetProperties();
 
         $text = "/**";
         foreach ($inputs as $ind => $prop) {
             $data = [];
-//     * @property $data[]|mixed $className
+            //     * @property $data[]|mixed $className
             $text .= "\n * @property " . self::GetType($prop->typeData);
 
             if (!$prop->default) $text .= "|null";
             $text .= ' $' . $ind;
 
-            if ($prop->comment || $prop->descr) $text .= " ". ($prop->comment ?? $prop->descr);
+            if ($prop->comment || $prop->descr) $text .= " " . ($prop->comment ?? $prop->descr);
 
         }
         $text .= "\n" . '*/';
@@ -41,13 +38,15 @@ class MigrationRender
         return $text . ' ';
     }
 
-    public static function RenderMigration(\MrProperter\Models\MPModel $model, $ignoreKey = [], $isModify = false)
-    {
+    public static function RenderMigration( \MrProperter\Models\MPModel $model, $ignoreKey, $isModify = false ) {
+
+
         $list = [];
         $inputs = $model->GetProperties();
 
         foreach ($inputs as $ind => $prop) {
-            if (isset($ignoreKey[$ind] ) or in_array( $ind, $ignoreKey)) continue;
+            if (isset($ignoreKey[$ind])) continue;
+
             $data = [];
 
             $data[self::GetType($prop->typeData)] = $ind;
@@ -80,8 +79,8 @@ class MigrationRender
         $modelName = basename(get_class($model));
 
         $className = "able_" . $tableName;
-        if($isModify)$className.="_modify";
-        if(!$isModify)$className.="_create";
+        if ($isModify) $className .= "_modify";
+        if (!$isModify) $className .= "_create";
         $className = "T" . Str::camel($className);
 
         $fileName = Str::snake($className);
@@ -89,14 +88,11 @@ class MigrationRender
         $fileName = date('Y_m_d_His') . '_' . $fileName . '.php';
 
 
-        $view = view("mrproperter::migration", ['list' => $list, 'tableName' => $tableName, 'className' => $className,'isModify'=>$isModify]);
-        return [
-            'content' => $view,
-            'file' => $fileName,
-            'class' => $className,
-            'table' => $tableName,
-        ];
-        return $view . ' ';
+        $view = view("mrproperter::migration", ['list' => $list, 'tableName' => $tableName, 'className' => $className, 'isModify' => $isModify]);
+        $response = ['content' => $view . '', 'file' => $fileName, 'class' => $className, 'table' => $tableName,];
+
+        if (empty($list)) $response['content'] = null;
+        return $response;
     }
 
 }
