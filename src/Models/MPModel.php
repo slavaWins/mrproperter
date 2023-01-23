@@ -17,7 +17,8 @@ class MPModel extends Model
      * функция Property settings нужно для того чтобы настроить для модели конфиг в котором будут описаны все её параметры то есть мы просто перечисляем какой параметр какой у него тип как у него дефолтное значение настраиваем валидацию это всё делается в одном месте по сути это заменяет миграцию.
      * @return void
      */
-    public function PropertiesSetting(){
+    public function PropertiesSetting()
+    {
 
     }
 
@@ -41,15 +42,34 @@ class MPModel extends Model
          * @var PropertyBuilderStructure $prop
          */
         foreach ($props as $K => $prop) {
-            $text = Library\MigrationRender::GetType($prop->typeData);
-            if ($prop->max) $text .= "|max:" . $prop->max;
-            if ($prop->min) $text .= "|min:" . $prop->min;
-            $rules[$K] = $text;
+            $rules[$K] = self::RenderValidateRuleByPropertyData($prop);;
         }
 
         return $rules;
     }
 
+    
+    private static function RenderValidateRuleByPropertyData($propertyData)
+    {
+        $text = Library\MigrationRender::GetType($propertyData->typeData);
+        if ($propertyData->max) $text .= "|max:" . $propertyData->max;
+        if ($propertyData->min) $text .= "|min:" . $propertyData->min;
+        return $text;
+    }
+
+    public static function GetValidateRuleProperty($propertyName)
+    {
+        /** @var MPModel $cl */
+        $cln = get_called_class();
+        $cl = new $cln();
+        $props = $cl->GetProperties();
+        if (!isset($props[$propertyName])) {
+            throw new \Exception("Не найден параметр " . $propertyName . " в моделе " . $cln);
+        }
+        $rules = [];
+
+        $rules[$K] = self::RenderValidateRuleByPropertyData($props[$propertyName]);
+    }
 
     /**
      * получить коллекцию полей по определенному тегу то есть нам возвращается только те поля у которых есть стык либо возвращаются все если так равен
@@ -57,7 +77,8 @@ class MPModel extends Model
      * @param $tag
      * @return PropertyBuilderStructure[]
      */
-    public function GetByTag($tag = null)
+    public
+    function GetByTag($tag = null)
     {
 
         if (!$tag) return $this->GetProperties();
@@ -69,7 +90,8 @@ class MPModel extends Model
     }
 
 
-    public function BuildInputAll($tag = null)
+    public
+    function BuildInputAll($tag = null)
     {
         $p = $this->GetProperties();
 
@@ -85,7 +107,8 @@ class MPModel extends Model
         }
     }
 
-    public function BuildInput($ind)
+    public
+    function BuildInput($ind)
     {
         $p = $this->GetProperties();
         if (!isset($p[$ind])) return null;
@@ -106,7 +129,7 @@ class MPModel extends Model
         }
 
         $inp = $inp
-            ->SetLabel( $prop->label ?? $prop->name ?? "na")
+            ->SetLabel($prop->label ?? $prop->name ?? "na")
             ->SetPlaceholder($prop->descr ?? null)
             ->SetName($ind)
             ->SetDescr($prop->descr ?? null); //->FrontendValidate()->String(0, 75)
@@ -121,14 +144,17 @@ class MPModel extends Model
 
     }
 
-    private $propertestConfig;
+    private
+        $propertestConfig;
+
     /**
      * @return PropertyBuilderStructure[]
      */
-    public function GetProperties()
+    public
+    function GetProperties()
     {
-        if($this->propertestConfig)return $this->propertestConfig;
-        $this->propertestConfig=$this->PropertiesSetting();
+        if ($this->propertestConfig) return $this->propertestConfig;
+        $this->propertestConfig = $this->PropertiesSetting();
         return $this->propertestConfig;
 
     }
