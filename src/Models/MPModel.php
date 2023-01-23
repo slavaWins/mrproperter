@@ -28,7 +28,7 @@ class MPModel extends Model
      * @param $tag
      * @return array
      */
-    public static function GetValidateRules($tag = null)
+    public static function GetValidateRules($tag = null, $isRequired = true)
     {
         /** @var MPModel $cl */
         $cln = get_called_class();
@@ -42,22 +42,25 @@ class MPModel extends Model
          * @var PropertyBuilderStructure $prop
          */
         foreach ($props as $K => $prop) {
-            $rules[$K] = self::RenderValidateRuleByPropertyData($prop);;
+            $rules[$K] = self::RenderValidateRuleByPropertyData($prop, $isRequired);
         }
 
         return $rules;
     }
 
-    
-    private static function RenderValidateRuleByPropertyData($propertyData)
+
+    private static function RenderValidateRuleByPropertyData($propertyData, $isRequired)
     {
-        $text = Library\MigrationRender::GetType($propertyData->typeData);
+        $text = "";
+        if ($isRequired) $text = "required|";
+
+        $text .= Library\MigrationRender::GetType($propertyData->typeData);
         if ($propertyData->max) $text .= "|max:" . $propertyData->max;
         if ($propertyData->min) $text .= "|min:" . $propertyData->min;
         return $text;
     }
 
-    public static function GetValidateRuleProperty($propertyName)
+    public static function GetValidateRuleProperty($propertyName, $isRequired = true)
     {
         /** @var MPModel $cl */
         $cln = get_called_class();
@@ -68,7 +71,7 @@ class MPModel extends Model
         }
         $rules = [];
 
-        $rules[$K] = self::RenderValidateRuleByPropertyData($props[$propertyName]);
+        $rules[$K] = self::RenderValidateRuleByPropertyData($props[$propertyName], $isRequired);
     }
 
     /**
