@@ -60,6 +60,13 @@ class MrProperterServiceProvider extends ServiceProvider
             ], 'public');
         }
 
+        $migrations_path = __DIR__ . '/../copy/Models';
+        if (file_exists($migrations_path)) {
+            $this->publishes([
+                $migrations_path => app_path('Models'),
+            ], 'public');
+        }
+
 
         $js_path = __DIR__ . '/../copy/js';
         if (file_exists($js_path)) {
