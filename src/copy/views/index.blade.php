@@ -18,18 +18,18 @@ use MrProperter\Library\FormBuilderStructure;
         <div class="  col-8 ">
             <small>FormBuilderStructure</small>
             <h3>Сборка формы по своей структуре</h3>
-
-
             <div class="card  mb-4">
                 <div class="card-body">
                     @php
 
-                        FormBuilderStructure::New($model)
+                        FormBuilderStructure::New($model  )
                         ->Input("selector_character_enabled")
                         ->Row()
-                        ->Input("selector_character")
-                        ->Input("selector_character_filter")
-                        ->Input("selector_character_to_varible")
+                        ->Input("name")
+                        ->Input("defval")
+                        ->Input("typeVal")
+                        ->Input("min")
+                        ->Input("max")
                         ->Row()
                         ->Input("render_character_enabled")
                         ->Row()
@@ -65,11 +65,31 @@ use MrProperter\Library\FormBuilderStructure;
         <div class="  col-6 ">
             <small>MigrationRender</small>
             <h3>Генерация файла миграции</h3>
+            <p>Исходя из структуры модели, можно создать сразу заполненую миграцию. С комментариями, с правильным
+                названием. При этом миграцию создается от модели.</p>
+            <p>php artisan mrp:migration ModelName</p>
             <div class="card  mb-6">
                 <div class="card-body" style="font-size: 15px; font-family: Arial;">
+                    @php
+                        $keys= collect( $model->GetProperties())->take(2)->keys()->toArray();
+                            echo nl2br( \MrProperter\Library\MigrationRender::RenderMigration($model, $keys)['content']) ;
+                    @endphp
+                </div>
+            </div>
+        </div>
 
-                    {!!  \MrProperter\Library\MigrationRender::RenderMigration($model) !!}
-
+        <div class="  col-6 ">
+            <small>MigrationRender</small>
+            <h3>Создание модифицирующий миграции</h3>
+            <p>Если вы дописали новые ключи в модель, и создадите ещё одну миграцию - она заполнится как модификация. С
+                учетом только новых ключей.</p>
+            <p>php artisan mrp:migration ModelName</p>
+            <div class="card  mb-6">
+                <div class="card-body" style="font-size: 15px; font-family: Arial;">
+                    @php
+                        $keys= collect( $model->GetProperties())->skip(2)->keys()->toArray();
+                            echo nl2br( \MrProperter\Library\MigrationRender::RenderMigration($model, $keys, true)['content']) ;
+                    @endphp
                 </div>
             </div>
         </div>
@@ -105,3 +125,4 @@ use MrProperter\Library\FormBuilderStructure;
 
     </div>
 @endsection
+
