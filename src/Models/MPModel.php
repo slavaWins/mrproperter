@@ -8,7 +8,7 @@ use App\Library\MrProperter\PropertyBuilderStructure;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Cache;
 use SlavaWins\Formbuilder\Library\FElement;
-
+use Illuminate\Validation\Rule;
 
 class MPModel extends Model
 {
@@ -49,14 +49,22 @@ class MPModel extends Model
     }
 
 
-    private static function RenderValidateRuleByPropertyData($propertyData, $isRequired)
+    private static function RenderValidateRuleByPropertyData(Library\PropertyBuilderStructure $propertyData, $isRequired)
     {
+        if($propertyData->customValidationRule)return $propertyData->customValidationRule;
+
         $text = "";
         if ($isRequired) $text = "required|";
 
         $text .= Library\MigrationRender::GetType($propertyData->typeData);
         if ($propertyData->max) $text .= "|max:" . $propertyData->max;
         if ($propertyData->min) $text .= "|min:" . $propertyData->min;
+        if ($propertyData->typeData == "select") {
+            $text .= "|in:";
+            foreach ($propertyData->options as $K => $V) $text .= '"' . $K . '",';
+            $text = trim($text, ",");
+        }
+        $text = trim($text, "|");
         return $text;
     }
 

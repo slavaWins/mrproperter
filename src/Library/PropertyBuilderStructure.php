@@ -10,6 +10,7 @@ class PropertyBuilderStructure
 {
     public string $name;
     public string $label = "";
+    public ?string $customValidationRule = null;
     public string $descr = "";
     public $tags = null;
     public string $icon = "";
@@ -47,6 +48,11 @@ class PropertyBuilderStructure
     public function SetLabel($val)
     {
         $this->label = $val;
+        return $this;
+    }
+    public function SetValidationRule($val)
+    {
+        $this->customValidationRule = $val;
         return $this;
     }
 
