@@ -3,42 +3,52 @@
 namespace App\Models;
 
 
+use MrProperter\Library\PropertyConfigStructure;
 use MrProperter\Models\MPModel;
 use MrProperter\Library\PropertyBuilderStructure;
 
 class TemplateModel extends MPModel
 {
 
-    public function GetProperties()
+    public function PropertiesSetting()
     {
-        return [
-            'selector_character_enabled' => PropertyBuilderStructure::Checkbox("Селектор чарактера")
-                ->SetDescr("Вывести все чары определенного типа, и сохр в переменные комнаты"),
+        $config = new PropertyConfigStructure($this);
 
-            'selector_character' => PropertyBuilderStructure::Select("Селектор чаров")->SetOptions(['Garage', 'Room', 'Enemy'])
-                ->SetDescr("Выводим чаректер селектор на этом шаге, и сейвет результат в id"),
+        $config->String("name")->SetLabel("Название ")->SetDescr("")->SetMin(2)->SetMax(26)->SetDefault("null");
+        $config->String("defval")->SetLabel("Дефалтное значение ")->SetDescr("")->SetMin(0)->SetMax(26);
+        $config->Select("typeVal")->SetLabel("Чарактер")->SetOptions(['Int', 'String', 'Select']);
+        $config->Int("min")->SetOptions(['Int', 'String', 'Select'])->SetLabel("Min");
+        $config->Int("max")->SetOptions(['Int', 'String', 'Select'])->SetLabel("max");
+        $config->Int("descr")->SetOptions(['Int', 'String', 'Select'])->SetLabel("descr")->SetDescr("Описание поля");
 
-            'selector_character_filter' => PropertyBuilderStructure::Select("Фильтр чаров")->SetOptions(['Принадлежит игроку', 'Переменная 1', 'Перменная 2'])
-                ->SetDescr("Фильтр для выбора чара"),
+        $config->Checkbox("selector_character_enabled3")->SetLabel("Селектор чарактера")
+            ->SetDescr("Вывести все чары определенного типа, и сохр в переменные комнаты");
 
-            'selector_character_to_varible' => PropertyBuilderStructure::Select("Сохр в")->SetOptions(['Никуда', 'В перемен1', 'Перменная 2'])
-                ->SetDescr("После выбора чара куда сохранить выбранное?"),
+        $config->Select("selector_character")->SetLabel("Чарактер")->SetOptions(['Garage', 'Room', 'Enemy'])
+            ->SetDescr("Выводим чаректер селектор на этом шаге, и сейвет результат в id");
 
-            'render_character_enabled' => PropertyBuilderStructure::Checkbox("Рендерить переменную")->SetDefault(true)
-                ->SetDescr("Отрендерить чарактера сохраненного в комнате?"),
+        $config->Select("selector_character_filter")->SetLabel("Фильтр чаров")->SetOptions(['Принадлежит игроку', 'Переменная 1', 'Перменная 2'])
+            ->SetDescr("Фильтр для выбора чара");
 
-            'render_character' => PropertyBuilderStructure::Select("Рендерить переменную")->SetOptions(['Не рендерить', 'Garage', 'Player'])
-                ->SetDescr("Этот чарактер будет отрендерен"),
+        $config->Select("selector_character_to_varible")->SetLabel("Сохр в ")->SetOptions(['Никуда', 'В перемен1', 'Перменная 2'])
+            ->SetDescr("После выбора чара куда сохранить выбранное?");
 
-            'user_id' => PropertyBuilderStructure::Int("Пользователь")
-                ->SetMax(10)
-                ->SetMin(1)->Comment("Поле пользователя")
-                ->SetDescr("Описание поля"),
+        $config->Checkbox("render_character_enabled")->SetLabel("Включить рендер?")->SetDefault(true)
+            ->SetDescr("Отрендерить чарактера сохраненного в комнате?");
 
-            'message' => PropertyBuilderStructure::String("описание")
-                ->SetMin(3)->SetMax(6)->Comment("Поле с описание типа")
-                ->SetDescr("Описание поля")->AddTag('test'),
-        ];
+        $config->Select("render_character")->SetLabel("Рендерить переменную")->SetOptions(['Не рендерить', 'Garage', 'Player'])
+            ->SetDescr("Этот чарактер будет отрендерен");
+
+        $config->Int("render_character")->SetLabel("Пользователь")
+            ->SetDescr("Этот чарактер будет отрендерен")->SetMax(10)
+            ->SetMin(1)->Comment("Поле пользователя")
+            ->SetDescr("Описание поля");
+
+        $config->String("message")->SetLabel("Пользователь")
+            ->SetDescr("Поле с описание типа")->SetMin(3)->SetMax(6)->Comment("Поле с описание типа")
+            ->SetDescr("Описание поля")->AddTag('test');
+
+        return $config->GetConfig();
     }
 
 }
