@@ -7,6 +7,7 @@ use App\Library\MrProperter\MigrationRender;
 use App\Library\MrProperter\PropertyBuilderStructure;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Cache;
+use MrProperter\Library\PropertyConfigStructure;
 use SlavaWins\Formbuilder\Library\FElement;
 use Illuminate\Validation\Rule;
 
@@ -15,7 +16,7 @@ class MPModel extends Model
 
     /**
      * функция Property settings нужно для того чтобы настроить для модели конфиг в котором будут описаны все её параметры то есть мы просто перечисляем какой параметр какой у него тип как у него дефолтное значение настраиваем валидацию это всё делается в одном месте по сути это заменяет миграцию.
-     * @return void
+     * @return PropertyConfigStructure
      */
     public function PropertiesSetting()
     {
@@ -51,7 +52,7 @@ class MPModel extends Model
 
     private static function RenderValidateRuleByPropertyData(Library\PropertyBuilderStructure $propertyData, $isRequired)
     {
-        if($propertyData->customValidationRule)return $propertyData->customValidationRule;
+        if ($propertyData->customValidationRule) return $propertyData->customValidationRule;
 
         $text = "";
         if ($isRequired) $text = "required|";
@@ -158,16 +159,27 @@ class MPModel extends Model
     private
         $propertestConfig;
 
+    public function PropertyFillebleByTag($data, $tag = null)
+    {
+        $pros = $this->GetByTag($tag);
+        foreach ($pros as $K => $V) {
+            if(!isset($data[$K]))continue;
+            $this->$K = $data[$K];
+        }
+    }
+
     /**
      * @return PropertyBuilderStructure[]
      */
-    public
-    function GetProperties()
+    public function GetProperties()
     {
         if ($this->propertestConfig) return $this->propertestConfig;
-        $this->propertestConfig = $this->PropertiesSetting();
-        return $this->propertestConfig;
+        $d = $this->PropertiesSetting();
+        
+        if (isset($d->isPropertyConfigStructure))$d= $d->GetConfig();
 
+        $this->propertestConfig = $d;
+        return $this->propertestConfig;
     }
 
 }

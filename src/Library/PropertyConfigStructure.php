@@ -11,7 +11,7 @@ class PropertyConfigStructure
 {
     private MPModel $model;
 
-
+public $isPropertyConfigStructure=true; 
     private $list = [];
 
     public function __construct(MPModel $model)
