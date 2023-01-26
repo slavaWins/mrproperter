@@ -2,6 +2,8 @@
 
 namespace MrProperter\Models;
 
+use App\Models\User;
+use Illuminate\Support\Facades\Validator;
 use MrProperter\Library;
 use App\Library\MrProperter\MigrationRender;
 use App\Library\MrProperter\PropertyBuilderStructure;
@@ -49,6 +51,37 @@ class MPModel extends Model
         return $rules;
     }
 
+    /**
+     * @param $requestArray
+     * @param $tag
+     * @return \Illuminate\Contracts\Validation\Validator
+     */
+    public static function GetValidatorRequest($requestArray, $tag = null){
+        $cln = get_called_class();
+        $validator = Validator::make($requestArray, $cln::GetValidateRules($tag), [],$cln::GetValidateRulesFailedNames($tag));
+        return $validator;
+
+    }
+    
+    public static function GetValidateRulesFailedNames($tag = null)
+    {
+        /** @var MPModel $cl */
+        $cln = get_called_class();
+        $cl = new $cln();
+        $props = $cl->GetByTag($tag);
+
+        $rules = [];
+
+        /**
+         * @var  $K
+         * @var PropertyBuilderStructure $prop
+         */
+        foreach ($props as $K => $prop) {
+            $rules[$K] = $prop->label;
+        }
+
+        return $rules;
+    }
 
     private static function RenderValidateRuleByPropertyData(Library\PropertyBuilderStructure $propertyData, $isRequired)
     {
@@ -175,7 +208,7 @@ class MPModel extends Model
     {
         if ($this->propertestConfig) return $this->propertestConfig;
         $d = $this->PropertiesSetting();
-        
+
         if (isset($d->isPropertyConfigStructure))$d= $d->GetConfig();
 
         $this->propertestConfig = $d;
