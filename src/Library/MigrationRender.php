@@ -7,17 +7,22 @@ use App\Models\User;
 use Illuminate\Database\Migrations\MigrationCreator;
 use Illuminate\Support\Str;
 
-class MigrationRender {
+class MigrationRender
+{
 
-    public static function GetType( $type ) {
+    public static function GetType($type)
+    {
+        if ($type == "text") return "text";
         if ($type == "int") return "integer";
         if ($type == "string") return 'string';
         if ($type == "select") return 'string';
         if ($type == "checkbox") return 'boolean';
+        if ($type == "float") return 'float';
         return 'string';
     }
 
-    public static function RenderDoc( \MrProperter\Models\MPModel $model ) {
+    public static function RenderDoc(\MrProperter\Models\MPModel $model)
+    {
         $list = [];
         $inputs = $model->GetProperties();
 
@@ -38,7 +43,8 @@ class MigrationRender {
         return $text . ' ';
     }
 
-    public static function RenderMigration( \MrProperter\Models\MPModel $model, $ignoreKey, $isModify = false ) {
+    public static function RenderMigration(\MrProperter\Models\MPModel $model, $ignoreKey, $isModify = false)
+    {
 
 
         $list = [];
@@ -49,12 +55,16 @@ class MigrationRender {
 
             $data = [];
 
-            $data[self::GetType($prop->typeData)] = $ind;
+            $columType = self::GetType($prop->typeData);
+         //   if ($columType == "text") $columType = "string";
+            $data[$columType] = $ind;
 
-            if ($prop->default) $data['default'] = $prop->default;
+            $data['default'] = $prop->default;
 
-            if (!$prop->default) $data['nullable'] = null;
+            if ($prop->default === null) $data['nullable'] = null;
             if ($prop->comment || $prop->descr) $data['comment'] = $prop->comment ?? $prop->descr;
+
+            if ($prop->typeData == "text") unset($data['default']);
 
 
             foreach ($data as $K => $V) {
@@ -73,8 +83,6 @@ class MigrationRender {
             }
             $list[$ind] = $data;
         }
-
-
         $tableName = $model->getTable();
         $modelName = basename(get_class($model));
 

@@ -5,9 +5,11 @@ namespace MrProperter\Library;
 
 use App\Models\User;
 use http\Params;
+use MrProperter\Models\MPModel;
 
 class PropertyBuilderStructure
 {
+    public ?MPModel $model = null;
     public string $name;
     public string $label = "";
     public ?string $customValidationRule = null;
@@ -18,7 +20,11 @@ class PropertyBuilderStructure
     public $max = null;
     public $min = 0;
     public $value = 0;
+    public $belongsToClass = null;
+    public $belongsMethod = null;
+    public $belongsPropertyText = null;
     public string $typeData = "int";
+    public $prefix;
     public $postfix;
     private string $format = "";
     /**
@@ -51,6 +57,7 @@ class PropertyBuilderStructure
         $this->label = $val;
         return $this;
     }
+
     public function SetValidationRule($val)
     {
         $this->customValidationRule = $val;
@@ -71,8 +78,6 @@ class PropertyBuilderStructure
     }
 
 
-
-
     public function SetOptions(array $array)
     {
         $this->options = $array;
@@ -87,12 +92,21 @@ class PropertyBuilderStructure
         return $this;
     }
 
+    public function SetBelong($className, $method, $otherNameProperty)
+    {
+        $this->belongsToClass = $className;
+        $this->belongsMethod = $method;
+        $this->belongsPropertyText = $otherNameProperty;
+        return $this;
+    }
+
 
     public function Hidden()
     {
         $this->is_hidden_property = true;
         return $this;
     }
+
     public function NonEditable()
     {
         $this->is_nonEditable = true;
@@ -122,6 +136,50 @@ class PropertyBuilderStructure
     {
         $this->postfix = $val;
         return $this;
+    }
+
+    public function SetPrefix($val)
+    {
+        $this->prefix = $val;
+        return $this;
+    }
+
+    public function RenderValue()
+    {
+
+
+        if ($this->value === null) return "Не указано";
+
+
+        if ($this->belongsToClass) {
+            if (!$this->model) return "Не инциализировано";
+            $meth = $this->belongsMethod;
+            if (!isset($this->model->$meth)) return "Нет метода";
+
+            $objTo = $this->model->$meth;
+            if (!$objTo) return "Нет связи";
+
+            $toProp = $this->belongsPropertyText;
+            if (!isset($objTo->$toProp)) return "У связи нет " . $toProp;
+
+            return $objTo->$toProp;
+        }
+
+        if ($this->typeData == "checkbox") {
+            if ($this->value) return "Да";
+            return "Нет";
+        }
+
+        if ($this->typeData == "select") {
+            if (!$this->options[$this->value]) return "Опция не найдена";
+            return $this->options[$this->value];
+        }
+
+        $val = $this->value;
+
+        if ($this->postfix) $val = $val . $this->postfix;
+        if ($this->prefix) $val = $this->prefix . $val;
+        return $val;
     }
 }
 

@@ -64,11 +64,29 @@ class PropertyConfigStructure
         return $s;
     }
 
+    public function Text($name)
+    {
+        $s = new PropertyBuilderStructure();
+        $s->name = $name;
+        $s->typeData = 'text';
+        $this->list[$name] = $s;
+        return $s;
+    }
+
     public function Int($name)
     {
         $s = new PropertyBuilderStructure();
         $s->name = $name;
         $s->typeData = 'int';
+        $this->list[$name] = $s;
+        return $s;
+    }
+
+    public function Float($name)
+    {
+        $s = new PropertyBuilderStructure();
+        $s->name = $name;
+        $s->typeData = 'float';
         $this->list[$name] = $s;
         return $s;
     }

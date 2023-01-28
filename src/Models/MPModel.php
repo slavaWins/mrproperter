@@ -92,7 +92,12 @@ class MPModel extends Model
         $text = "";
         if ($isRequired) $text = "required|";
 
-        $text .= Library\MigrationRender::GetType($propertyData->typeData);
+
+        $columType = Library\MigrationRender::GetType($propertyData->typeData);
+        if ($columType == "text") $columType = "string";
+        $text .= $columType;
+
+
 
         if ($propertyData->typeData == 'checkbox') {
             return "";
@@ -223,13 +228,14 @@ class MPModel extends Model
      */
     public function GetProperties()
     {
-        if ($this->propertestConfig) return $this->propertestConfig;
+       // if ($this->propertestConfig) return $this->propertestConfig;
         $d = $this->PropertiesSetting();
 
         if (isset($d->isPropertyConfigStructure)) $d = $d->GetConfig();
 
         foreach ($d as $K => $V) {
             $d[$K]->value = $this->$K ?? $V->default ?? "";
+            $d[$K]->model = $this;
         }
 
         $this->propertestConfig = $d;
