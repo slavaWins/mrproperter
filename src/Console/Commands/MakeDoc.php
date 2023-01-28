@@ -71,7 +71,7 @@ class MakeDoc extends Command
                     foreach ($proplist as $K => $prop) {
                         $fout .= "\n /** @property " . MigrationRender::GetType($prop->typeData);
                         if (!$prop->default) $fout .= "|null ";
-                        $fout .= '$' . $K . ' ' . ($prop->comment ?? $prop->descr ?? " ");
+                        $fout .= '$' . $K . ' ' . ($prop->comment ?? $prop->label ?? $prop->descr ?? " ");
                         $fout .= ' */';
                         $this->info("add @property ".$K);
                     }

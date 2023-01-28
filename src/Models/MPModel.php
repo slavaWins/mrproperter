@@ -56,13 +56,15 @@ class MPModel extends Model
      * @param $tag
      * @return \Illuminate\Contracts\Validation\Validator
      */
-    public static function GetValidatorRequest($requestArray, $tag = null){
+    public static function GetValidatorRequest($requestArray, $tag = null)
+    {
         $cln = get_called_class();
-        $validator = Validator::make($requestArray, $cln::GetValidateRules($tag), [],$cln::GetValidateRulesFailedNames($tag));
+
+        $validator = Validator::make($requestArray, $cln::GetValidateRules($tag), [], $cln::GetValidateRulesFailedNames($tag));
         return $validator;
 
     }
-    
+
     public static function GetValidateRulesFailedNames($tag = null)
     {
         /** @var MPModel $cl */
@@ -91,6 +93,12 @@ class MPModel extends Model
         if ($isRequired) $text = "required|";
 
         $text .= Library\MigrationRender::GetType($propertyData->typeData);
+
+        if ($propertyData->typeData == 'checkbox') {
+            return "";
+        }
+
+
         if ($propertyData->max) $text .= "|max:" . $propertyData->max;
         if ($propertyData->min) $text .= "|min:" . $propertyData->min;
         if ($propertyData->typeData == "select") {
@@ -141,13 +149,15 @@ class MPModel extends Model
         $p = $this->GetProperties();
 
         $html = "";
-        foreach ($this->toArray() as $K => $V) {
+        foreach ($p as $K => $V) {
             if (!isset($p[$K])) continue;
+            if ($p[$K]->is_nonEditable) continue;
 
             if ($tag) {
                 if (!$p[$K]->tags) continue;
                 if (!isset($p[$K]->tags[$tag])) continue;
             }
+
             $html .= $this->BuildInput($K);
         }
     }
@@ -196,20 +206,31 @@ class MPModel extends Model
     {
         $pros = $this->GetByTag($tag);
         foreach ($pros as $K => $V) {
-            if(!isset($data[$K]))continue;
+            if (!isset($data[$K])) continue;
+
+            if ($V->typeData == "checkbox") {
+                $_val = false;
+                if ($data[$K] == "on") $_val = true;
+                $data[$K] = $_val;
+            }
+
             $this->$K = $data[$K];
         }
     }
 
     /**
-     * @return PropertyBuilderStructure[]
+     * @return Library\PropertyBuilderStructure[]
      */
     public function GetProperties()
     {
         if ($this->propertestConfig) return $this->propertestConfig;
         $d = $this->PropertiesSetting();
 
-        if (isset($d->isPropertyConfigStructure))$d= $d->GetConfig();
+        if (isset($d->isPropertyConfigStructure)) $d = $d->GetConfig();
+
+        foreach ($d as $K => $V) {
+            $d[$K]->value = $this->$K ?? $V->default ?? "";
+        }
 
         $this->propertestConfig = $d;
         return $this->propertestConfig;

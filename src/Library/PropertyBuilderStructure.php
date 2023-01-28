@@ -25,6 +25,7 @@ class PropertyBuilderStructure
      * @var true
      */
     public bool $is_hidden_property = false;
+    public bool $is_nonEditable = false;
     public array $options;
     public $comment;
 
@@ -90,6 +91,11 @@ class PropertyBuilderStructure
     public function Hidden()
     {
         $this->is_hidden_property = true;
+        return $this;
+    }
+    public function NonEditable()
+    {
+        $this->is_nonEditable = true;
         return $this;
     }
 
