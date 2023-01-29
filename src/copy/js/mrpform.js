@@ -76,4 +76,4 @@ $(document).ready(function () {
     MrpForm.Init();
 });
 
-window.StepPoll = MrpForm;
+window.MrpForm = MrpForm;
