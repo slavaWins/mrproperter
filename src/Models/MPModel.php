@@ -85,7 +85,7 @@ class MPModel extends Model
         return $rules;
     }
 
-    private static function RenderValidateRuleByPropertyData(Library\PropertyBuilderStructure $propertyData, $isRequired)
+    public static function RenderValidateRuleByPropertyData(Library\PropertyBuilderStructure $propertyData, $isRequired)
     {
         if ($propertyData->customValidationRule) return $propertyData->customValidationRule;
 
