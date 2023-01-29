@@ -58,6 +58,11 @@ php artisan vendor:publish --provider="MrProperter\Providers\MrProperterServiceP
 Теперь создайте свою собственную модель
  ```
     php artisan mrp:model Player
+ ```
+
+Так же в комплекте есть мега штука для формы ajax. Но скорее всего она в другой пакет перейдет. 
+ ```
+    <script src="{{ asset('js/mrpform.js') }}" defer></script>
  ``` 
 
 

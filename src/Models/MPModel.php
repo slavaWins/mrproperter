@@ -98,7 +98,6 @@ class MPModel extends Model
         $text .= $columType;
 
 
-
         if ($propertyData->typeData == 'checkbox') {
             return "";
         }
@@ -173,7 +172,6 @@ class MPModel extends Model
         $inp = FElement::NewInputText();
 
 
-
         if ($prop->typeData == "checkbox") {
             $inp = FElement::NewInputText()->SetView()->InputBoolRow();
         } elseif ($prop->typeData == "text" or $prop->typeData == "int") {
@@ -215,7 +213,14 @@ class MPModel extends Model
     {
         $pros = $this->GetByTag($tag);
         foreach ($pros as $K => $V) {
-            if (!isset($data[$K])) continue;
+
+            if (!isset($data[$K])) {
+                if ($V->typeData == "checkbox") {
+                    $data[$K] = false;
+                }else{
+                    continue;
+                }
+            }
 
             if ($V->typeData == "checkbox") {
                 $_val = false;
@@ -227,12 +232,25 @@ class MPModel extends Model
         }
     }
 
+    public function ValidateAndFilibleByRequest(array $data, $tag = null)
+    {
+        $cl = get_called_class();
+        $validator = $cl::GetValidatorRequest($data, $tag);
+        if ($validator->fails()) {
+            return $validator->errors()->first();
+        }
+
+        $this->PropertyFillebleByTag($data, $tag);
+        $this->save();
+        return true;
+    }
+
     /**
      * @return Library\PropertyBuilderStructure[]
      */
     public function GetProperties()
     {
-       // if ($this->propertestConfig) return $this->propertestConfig;
+        // if ($this->propertestConfig) return $this->propertestConfig;
         $d = $this->PropertiesSetting();
 
         if (isset($d->isPropertyConfigStructure)) $d = $d->GetConfig();

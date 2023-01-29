@@ -6,6 +6,7 @@ use Illuminate\Support\ServiceProvider;
 use MrProperter\Console\Commands\MakeMigration;
 use MrProperter\Console\Commands\MakeDoc;
 use MrProperter\Console\Commands\MakeModel;
+use MrProperter\View\Components\MrpForm;
 
 class MrProperterServiceProvider extends ServiceProvider
 {
@@ -38,6 +39,9 @@ class MrProperterServiceProvider extends ServiceProvider
 
         $this->loadViewsFrom(__DIR__ . '/../resources/views', 'mrproperter');
 
+        $this->loadViewComponentsAs('', [
+            MrpForm::class,
+        ]);
 
         $migrations_path = __DIR__ . '/../copy/migrations';
         if (file_exists($migrations_path)) {
@@ -71,7 +75,7 @@ class MrProperterServiceProvider extends ServiceProvider
         $js_path = __DIR__ . '/../copy/js';
         if (file_exists($js_path)) {
             $this->publishes([
-                $js_path => public_path('js/mrproperter'),
+                $js_path => public_path('js'),
             ], 'public');
         }
 
