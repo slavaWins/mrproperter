@@ -167,18 +167,12 @@ class MPModel extends Model
         }
     }
 
-    public
-    function BuildInput($ind)
+    public static function BuildInputByStruct($ind, $prop, $value)
     {
-        $p = $this->GetProperties();
-        if (!isset($p[$ind])) return null;
-        $prop = $p[$ind];
 
         $inp = FElement::NewInputText();
 
-        if ($prop->typeData <> "checkbox") {
 
-        }
 
         if ($prop->typeData == "checkbox") {
             $inp = FElement::NewInputText()->SetView()->InputBoolRow();
@@ -199,10 +193,20 @@ class MPModel extends Model
             $inp->FrontendValidate()->String($prop->min, $prop->max ?? 999999);
         }
 
-        $html = $inp->SetValue(old($ind, $this->$ind ?? ""))
+        $html = $inp->SetValue(old($ind, $value))
             ->RenderHtml(true);
+    }
+
+    public function BuildInput($ind)
+    {
+        $p = $this->GetProperties();
+        if (!isset($p[$ind])) return null;
+        $prop = $p[$ind];
+        $value = $this->$ind ?? $prop->default ?? "";
+        self::BuildInputByStruct($ind, $prop, $value);
 
     }
+
 
     private
         $propertestConfig;
