@@ -95,6 +95,7 @@ class MPModel extends Model
 
         $columType = Library\MigrationRender::GetType($propertyData->typeData);
         if ($columType == "text") $columType = "string";
+        if ($columType == "float") $columType = "numeric";
         $text .= $columType;
 
 
