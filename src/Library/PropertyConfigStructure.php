@@ -31,6 +31,18 @@ class PropertyConfigStructure
         return $s;
     }
 
+    /**
+     * @return PropertyBuilderStructure
+     */
+    public function Multioption($name)
+    {
+        $s = new PropertyBuilderStructure();
+        $s->name = $name;
+        $s->typeData = 'multioption';
+        $this->list[$name] = $s;
+        return $s;
+    }
+
     public function Checkbox($name)
     {
         $s = new PropertyBuilderStructure();

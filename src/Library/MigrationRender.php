@@ -18,6 +18,7 @@ class MigrationRender
         if ($type == "select") return 'string';
         if ($type == "checkbox") return 'boolean';
         if ($type == "float") return 'float';
+        if ($type == "multioption") return 'string';
         return 'string';
     }
 
@@ -56,7 +57,7 @@ class MigrationRender
             $data = [];
 
             $columType = self::GetType($prop->typeData);
-         //   if ($columType == "text") $columType = "string";
+            //   if ($columType == "text") $columType = "string";
             $data[$columType] = $ind;
 
             $data['default'] = $prop->default;
@@ -66,6 +67,14 @@ class MigrationRender
 
             if ($prop->typeData == "text") unset($data['default']);
 
+            if ($prop->typeData == "multioption") {
+                $data = [
+                    'json' =>  '"' .$ind . '"' ,
+                    'comment' => '"' .( $prop->comment ?? $prop->descr ?? ""  ). '"',
+                ];
+                $list[$ind] = $data;
+                continue;
+            }
 
             foreach ($data as $K => $V) {
 
@@ -83,6 +92,7 @@ class MigrationRender
             }
             $list[$ind] = $data;
         }
+
         $tableName = $model->getTable();
         $modelName = basename(get_class($model));
 

@@ -102,11 +102,14 @@ class MPModel extends Model
         if ($propertyData->typeData == 'checkbox') {
             return "";
         }
+        if ($propertyData->typeData == 'multioption') {
+            return "array";
+        }
 
 
         if ($propertyData->max) $text .= "|max:" . $propertyData->max;
         if ($propertyData->min) $text .= "|min:" . $propertyData->min;
-        if ($propertyData->typeData == "select") {
+        if ($propertyData->typeData == "select" or $propertyData->typeData == "multioption") {
             $text .= "|in:";
             foreach ($propertyData->options as $K => $V) $text .= '"' . $K . '",';
             $text = trim($text, ",");
@@ -167,8 +170,29 @@ class MPModel extends Model
         }
     }
 
+    /**
+     * @param $ind
+     * @param Library\PropertyBuilderStructure $prop
+     * @param $value
+     * @return void
+     */
     public static function BuildInputByStruct($ind, $prop, $value)
     {
+
+
+        if ($prop->typeData == "multioption") {
+            FElement::New()->SetView()->H()->SetLabel($prop->label ?? $prop->name ?? "n/a")->RenderHtml(true);
+
+            if (is_string($value))   $value = json_decode($value, true);
+            foreach ($prop->options as $K => $V) {
+                $inp = FElement::NewInputText()->SetView()->InputBoolRow()->SetLabel($V ?? "na")
+                    ->SetName($ind . '[]')
+                    ->AddValueAttributeCheckbox($K)
+                    ->SetValue(isset($value[$K]));
+                $inp->RenderHtml(true);
+            }
+            return;
+        }
 
         $inp = FElement::NewInputText();
 
@@ -218,7 +242,7 @@ class MPModel extends Model
             if (!isset($data[$K])) {
                 if ($V->typeData == "checkbox") {
                     $data[$K] = false;
-                }else{
+                } else {
                     continue;
                 }
             }
@@ -227,6 +251,17 @@ class MPModel extends Model
                 $_val = false;
                 if ($data[$K] == "on") $_val = true;
                 $data[$K] = $_val;
+            }
+
+            if ($V->typeData == "multioption") {
+
+                $valueArray = [];
+                foreach ($V->options as $key => $_label) {
+                    if (in_array($key, $data[$K])) {
+                        $valueArray[$key] = true;
+                    }
+                }
+                $data[$K] = $valueArray;
             }
 
             $this->$K = $data[$K];
