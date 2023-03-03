@@ -162,7 +162,7 @@ class PropertyBuilderStructure
             $toProp = $this->belongsPropertyText;
             if (!isset($objTo->$toProp)) return "У связи нет " . $toProp;
 
-            return $objTo->$toProp;
+            return $objTo->id.': '.$objTo->$toProp;
         }
 
         if ($this->typeData == "checkbox") {

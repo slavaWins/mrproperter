@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Cache;
 use MrProperter\Library\PropertyConfigStructure;
 use SlavaWins\Formbuilder\Library\FElement;
 use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\Log;
 
 class MPModel extends Model
 {
@@ -130,6 +131,7 @@ class MPModel extends Model
         $rules = [];
 
         $rules[$K] = self::RenderValidateRuleByPropertyData($props[$propertyName], $isRequired);
+        return $rules[$K] ;
     }
 
     /**
@@ -258,9 +260,11 @@ class MPModel extends Model
                 $valueArray = [];
                 foreach ($V->options as $key => $_label) {
                     if (in_array($key, $data[$K])) {
+
                         $valueArray[$key] = true;
                     }
                 }
+
                 $data[$K] = $valueArray;
             }
 
@@ -270,6 +274,7 @@ class MPModel extends Model
 
     public function ValidateAndFilibleByRequest(array $data, $tag = null)
     {
+
         $cl = get_called_class();
         $validator = $cl::GetValidatorRequest($data, $tag);
         if ($validator->fails()) {

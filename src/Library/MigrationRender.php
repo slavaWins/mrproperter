@@ -69,8 +69,8 @@ class MigrationRender
 
             if ($prop->typeData == "multioption") {
                 $data = [
-                    'json' =>  '"' .$ind . '"' ,
-                    'comment' => '"' .( $prop->comment ?? $prop->descr ?? ""  ). '"',
+                    'json' => '"' . $ind . '"',
+                    'comment' => '"' . ($prop->comment ?? $prop->descr ?? "") . '"',
                 ];
                 $list[$ind] = $data;
                 continue;
@@ -97,9 +97,20 @@ class MigrationRender
         $modelName = basename(get_class($model));
 
         $className = "able_" . $tableName;
-        if ($isModify) $className .= "_modify";
-        if (!$isModify) $className .= "_create";
+        if ($isModify) $className .= "add";
+        if (!$isModify) $className .= "create";
+
+        $appendClassName = 'add_';
+        foreach (collect($list)->take(3) as $K=>$V){
+            $appendClassName.='_'.strtolower($K);
+        }
+
+
+        $className .= '_' . $appendClassName;
+        $className .= '_' . substr(md5(time()),0,5 );
+
         $className = "T" . Str::camel($className);
+
 
         $fileName = Str::snake($className);
         $fileName = str_replace($modelName, $tableName, $fileName);
