@@ -181,7 +181,6 @@ class MPModel extends Model
     public static function BuildInputByStruct($ind, $prop, $value)
     {
 
-
         if ($prop->typeData == "multioption") {
             FElement::New()->SetView()->H()->SetLabel($prop->label ?? $prop->name ?? "n/a")->RenderHtml(true);
 
@@ -203,19 +202,26 @@ class MPModel extends Model
             $inp = FElement::NewInputText()->SetView()->InputBoolRow();
         } elseif ($prop->typeData == "text" or $prop->typeData == "int") {
             $inp = FElement::NewInputText();
+
+
         } elseif ($prop->typeData == "select") {
             $inp = FElement::NewInputText()->SetView()->InputSelect()->AddOptionFromArray($prop->options);
         }
 
+
         $inp = $inp
+            ->SetLabel($prop->label ?? $prop->name ?? "na")
             ->SetLabel($prop->label ?? $prop->name ?? "na")
             ->SetPlaceholder($prop->descr ?? null)
             ->SetName($ind)
             ->SetDescr($prop->descr ?? null); //->FrontendValidate()->String(0, 75)
 
+        if($prop->max){
+            $inp->FrontendValidate()->String($prop->min, $prop->max);
+        }
 
         if ($prop->typeData == "string") {
-            $inp->FrontendValidate()->String($prop->min, $prop->max ?? 999999);
+         //   $inp->FrontendValidate()->String($prop->min, $prop->max ?? 999999);
         }
 
         $html = $inp->SetValue(old($ind, $value))
@@ -303,6 +309,22 @@ class MPModel extends Model
 
         $this->propertestConfig = $d;
         return $this->propertestConfig;
+    }
+
+    public function GetAllTags(){
+        $list = [];
+        foreach ($this->GetProperties() as $K=>$V){
+
+            if(!$V->tags)continue;
+            foreach ($V->tags as $tag){
+                if(in_array($tag, $list))continue;
+                $list[] =$tag;
+            }
+
+
+
+        }
+        return $list;
     }
 
 }

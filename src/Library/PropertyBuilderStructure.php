@@ -154,15 +154,23 @@ class PropertyBuilderStructure
         if ($this->belongsToClass) {
             if (!$this->model) return "Не инциализировано";
             $meth = $this->belongsMethod;
-            if (!isset($this->model->$meth)) return "Нет метода";
+            if (!isset($this->model->$meth)) return "Нет данных";
 
             $objTo = $this->model->$meth;
             if (!$objTo) return "Нет связи";
 
             $toProp = $this->belongsPropertyText;
-            if (!isset($objTo->$toProp)) return "У связи нет " . $toProp;
+            if(substr_count($toProp,'()')){
+                $toProp = str_replace("()", "", $toProp);
+                if(!method_exists($objTo, $toProp)){
+                    return "У связи нет метода " . $toProp;
+                }
+                return  $objTo->$toProp() .' #' .$objTo->id;
+            }else {
+                if (!isset($objTo->$toProp)) return "У связи нет переменной " . $toProp;
 
-            return $objTo->id.': '.$objTo->$toProp;
+                return  $objTo->$toProp .' #' .$objTo->id;
+            }
         }
 
         if ($this->typeData == "checkbox") {
@@ -171,8 +179,30 @@ class PropertyBuilderStructure
         }
 
         if ($this->typeData == "select") {
-            if (!$this->options[$this->value]) return "Опция не найдена";
+            if (!isset($this->options[$this->value])) return "Опция не найдена";
             return $this->options[$this->value];
+        }
+
+
+        if ($this->typeData == "multioption") {
+            $val = $this->value;
+            if (is_string($val)) {
+                $val = json_decode($val, true);
+            }
+
+            if(empty( $this->value))return  "Не указано";
+            if(empty($val))return  "Не указано";
+
+            $text = "";
+            foreach ($val as $K=>$V){
+                if (isset($this->options[$K])){
+                    $text.=", ".$this->options[$K];
+                }else {
+                    $text .= ", " . $K;
+                }
+            }
+            $text = trim($text, ", ");
+             return $text;
         }
 
         $val = $this->value;
