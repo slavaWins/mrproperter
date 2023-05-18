@@ -23,11 +23,22 @@ class MakeModel extends Command
     protected $description = 'Создать модель';
 
 
+    public static function GetClassFullModel($name){
+        if(strpos(self::GetModelPath($name), "Models/")>-1){
+            return '\App\Models\\' . $name;
+        }
+        return '\App\\' . $name;
+    }
+
     public static function GetModelPath($name)
     {
         $pTo = app_path("Models");
-
         $pTo = $pTo . '/' . $name . '.php';
+
+        if(!file_exists($pTo)){
+            $pTo = app_path("");
+            $pTo = $pTo . '/' . $name . '.php';
+        }
         return $pTo;
     }
 

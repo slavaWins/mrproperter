@@ -67,7 +67,8 @@ class MakeMigration extends Command {
         $pTo = MakeModel::GetModelPath($name);
         if (!file_exists($pTo)) return $this->error("Model not exist!");
 
-        $cln = '\App\Models\\' . $name;
+
+        $cln =  MakeModel::GetClassFullModel($name);
 
         /** @var MPModel $class */
         $class = new $cln();
