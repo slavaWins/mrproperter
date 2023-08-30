@@ -201,6 +201,7 @@ class MPModel extends Model
         if ($prop->typeData == "checkbox") {
             $inp = FElement::NewInputText()->SetView()->InputBoolRow();
         } elseif ($prop->typeData == "text" or $prop->typeData == "int") {
+
             $inp = FElement::NewInputText();
 
 
@@ -221,6 +222,11 @@ class MPModel extends Model
         }
 
         if ($prop->typeData == "string") {
+            if(is_object($value)){
+                if(get_class($value) == 'Illuminate\Support\Carbon'){
+                    $value = $value->format("d.m.Y");
+                }
+            }
          //   $inp->FrontendValidate()->String($prop->min, $prop->max ?? 999999);
         }
 

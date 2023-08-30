@@ -17,6 +17,8 @@ class PropertyBuilderStructure
     public $tags = null;
     public string $icon = "";
     public $default = 0;
+
+
     public $max = null;
     public $min = 0;
     public $value = 0;
@@ -91,6 +93,7 @@ class PropertyBuilderStructure
         $this->value = $val;
         return $this;
     }
+
 
     public function SetBelong($className, $method, $otherNameProperty)
     {

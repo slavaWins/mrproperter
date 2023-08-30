@@ -63,7 +63,8 @@ class MigrationRender
             $data['default'] = $prop->default;
 
             if ($prop->default === null) $data['nullable'] = null;
-            if ($prop->comment || $prop->descr) $data['comment'] = $prop->comment ?? $prop->descr;
+
+            if ($prop->comment || $prop->descr|| $prop->label) $data['comment'] =  $prop->label;
 
             if ($prop->typeData == "text") unset($data['default']);
 
