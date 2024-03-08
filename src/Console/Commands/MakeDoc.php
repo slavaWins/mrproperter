@@ -2,14 +2,14 @@
 
 namespace MrProperter\Console\Commands;
 
-use Illuminate\Support\Facades\Schema;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
-use Illuminate\Support\Facades\File;
-use MrProperter\Library\MigrationRender;
-use MrProperter\Library\PropertyBuilderStructure;
-use MrProperter\Models\MPModel;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Schema;
+use MrProperter\Helpers\FinderParts;
+use MrProperter\Library\MigrationRender;
+use MrProperter\Models\MPModel;
 
 class MakeDoc extends Command
 {
@@ -78,11 +78,11 @@ class MakeDoc extends Command
     {
         $name = $this->argument("Model");
 
-        $pTo = MakeModel::GetModelPath($name);
+        $pTo = FinderParts::GetModelPath($name);
         if (!file_exists($pTo)) return $this->error("Model not exist!");
 
 
-        $cln =  MakeModel::GetClassFullModel($name);
+        $cln = FinderParts::GetClassFullModel($name);
 
         /** @var MPModel $class */
         $model = new $cln();
@@ -94,11 +94,11 @@ class MakeDoc extends Command
         $fout = "";
         $needClassStart = strtolower("class" . $name . 'extends');
 
+
         $proplist = $model->GetProperties();
 
         $existProps = self::GetExistPrpoperys($f, $proplist, $name);
         $existPropsSheme = self::GetExistSchemePrpoperties($f, $proplist, $name);
-
 
         $docPropertyBlock = "/**\n";
         foreach ($proplist as $K => $prop) {
@@ -153,6 +153,7 @@ class MakeDoc extends Command
         $fout = trim($fout);
         $fout = str_replace("*/\n/**\n", "", $fout);
         $fout = str_replace("*/\n\n/**\n", "", $fout);
+
 
 
         file_put_contents($pTo, $fout);

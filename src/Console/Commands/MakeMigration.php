@@ -2,13 +2,14 @@
 
 namespace MrProperter\Console\Commands;
 
-use Illuminate\Support\Facades\Schema;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Schema;
+use MrProperter\Helpers\FinderParts;
 use MrProperter\Library\MigrationRender;
 use MrProperter\Models\MPModel;
-use Illuminate\Support\Facades\DB;
 
 class MakeMigration extends Command {
     /**
@@ -64,11 +65,11 @@ class MakeMigration extends Command {
     public function handle() {
         $name = $this->argument("Model");
 
-        $pTo = MakeModel::GetModelPath($name);
+        $pTo = FinderParts::GetModelPath($name);
         if (!file_exists($pTo)) return $this->error("Model not exist!");
 
 
-        $cln =  MakeModel::GetClassFullModel($name);
+        $cln = FinderParts::GetClassFullModel($name);
 
         /** @var MPModel $class */
         $class = new $cln();
