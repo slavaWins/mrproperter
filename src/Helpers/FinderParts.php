@@ -34,17 +34,24 @@
 
 
         private static function GetModelPathInServices($name) {
-            $servicesVariantas = ["Services", "Domain", "Domains"];
+            $servicesVariantas = ["Services",  "Domains"];
 
             foreach ($servicesVariantas as $serFoolder) {
                 $services = app_path($serFoolder);
                 if (!file_exists($services)) continue;
 
                 foreach (scandir($services) as $K => $service) if ($K > 1) {
-                    $serviceModelsFoolder = $services.'/'.$service.'/Models/'.$name.'.php';
-                    if (!file_exists($serviceModelsFoolder)) continue;
 
-                    return $serviceModelsFoolder;
+                    $serviceModelsFoolder = $services.'/'.$service.'/Models/'.$name.'.php';
+                    if (file_exists($serviceModelsFoolder)) return $serviceModelsFoolder;
+
+                    $serviceModelsFoolder = $services.'/'.$service.'/Domain/DataLayer/'.$name.'.php';
+                    if (file_exists($serviceModelsFoolder)) return $serviceModelsFoolder;
+
+
+                    $serviceModelsFoolder = $services.'/'.$service.'/Domain/DataLayer/Models/'.$name.'.php';
+                    if (file_exists($serviceModelsFoolder)) return $serviceModelsFoolder;
+
                 }
             }
 
