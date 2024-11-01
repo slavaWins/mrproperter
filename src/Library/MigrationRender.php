@@ -60,6 +60,8 @@
 
                 $data['default'] = $prop->default;
 
+
+
                 if ($prop->default === null) {
                     unset($data['default']);
                     $data['nullable'] = null;
@@ -67,7 +69,10 @@
 
                 if ($prop->comment || $prop->descr || $prop->label) $data['comment'] = $prop->label;
 
-                if ($prop->typeData == "text") unset($data['default']);
+                if ($prop->typeData == "text") {
+                    unset($data['default']);
+                    $data['nullable'] = null;
+                }
 
                 if ($prop->typeData == "multioption") {
                     $data = [
@@ -92,6 +97,12 @@
                     }
                     $data[$K] = $V;
                 }
+
+
+                if($prop->typeData=="select" or $prop->belongsMethod) {
+                    $data['index'] = null;
+                }
+
                 $list[$ind] = $data;
             }
 

@@ -3,6 +3,7 @@
 namespace MrProperter\Providers;
 
 use Illuminate\Support\ServiceProvider;
+use MrProperter\Console\Commands\MakeAll;
 use MrProperter\Console\Commands\MakeMigration;
 use MrProperter\Console\Commands\MakeDoc;
 use MrProperter\Console\Commands\MakeModel;
@@ -34,6 +35,7 @@ class MrProperterServiceProvider extends ServiceProvider
                 MakeDoc::class,
                 MakeModel::class,
                 MakeMigration::class,
+                MakeAll::class,
             ]);
         }
 

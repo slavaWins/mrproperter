@@ -2,11 +2,7 @@
 
 namespace MrProperter\Console\Commands;
 
-use Carbon\Carbon;
 use Illuminate\Console\Command;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\File;
-use Illuminate\Support\Facades\Schema;
 use MrProperter\Helpers\FinderParts;
 use MrProperter\Library\MigrationRender;
 use MrProperter\Models\MPModel;
@@ -84,12 +80,14 @@ class MakeDoc extends Command
 
         $cln = FinderParts::GetClassFullModel($name);
 
-        /** @var MPModel $class */
+        /** @var MPModel $model */
         $model = new $cln();
 
 
         $f = file_get_contents($pTo);
 
+
+        $addingBottomClass = '';
 
         $fout = "";
         $needClassStart = strtolower("class" . $name . 'extends');
@@ -100,29 +98,48 @@ class MakeDoc extends Command
         $existProps = self::GetExistPrpoperys($f, $proplist, $name);
         $existPropsSheme = self::GetExistSchemePrpoperties($f, $proplist, $name);
 
+        $addingPropertyCount = 0;
+
         $docPropertyBlock = "/**\n";
+
+
         foreach ($proplist as $K => $prop) {
+            if ($prop->belongsMethod) {
+                $title = 'public function ' . $prop->belongsMethod . '()';
+                if (substr_count($f, $title) == 0) {
+                    $addingBottomClass .= $title . '
+    {
+        return $this->belongsTo(' . basenames($prop->belongsToClass) . '::class, "' . $K . '");
+    }';
+                }
+            }
+
             if (isset($existProps[$K])) continue;
-            $docPropertyBlock .= "\n * @property " . MigrationRender::GetType($prop->typeData);
+            $addingPropertyCount++;
+            $_type = MigrationRender::GetType($prop->typeData);
+            if($_type=="text")$_type="string";
+            $docPropertyBlock .= "\n * @property " . $_type;
             if (!$prop->default) $docPropertyBlock .= "|null ";
-            $docPropertyBlock .= '$' . $K . ' ' . ($prop->comment ?? $prop->label ?? $prop->descr ?? " ");
+            $docPropertyBlock .= ' $' . $K . ' ' . ($prop->comment ?? $prop->label ?? $prop->descr ?? " ");
+
+
         }
         $docPropertyBlock .= "\n*/";
+
 
 
         $docScheme = "";
         foreach ($proplist as $K => $prop) {
             if (isset($existPropsSheme[$K])) continue;
             $docScheme .= "\n " . '@OA\Property( property="' . $K . '", ';
-            $docScheme .= "\n ".' description="' . ($prop->comment ?? $prop->label ?? $prop->descr ?? "Без описания") . '"),';
+            $docScheme .= "\n " . ' description="' . ($prop->comment ?? $prop->label ?? $prop->descr ?? "Без описания") . '"),';
 
         }
-        $docScheme = trim($docScheme,'');
-       // $docScheme = trim($docScheme,',');
+        $docScheme = trim($docScheme, '');
+        // $docScheme = trim($docScheme,',');
         $docScheme = str_replace("\n", "\n *     ", $docScheme);
 
         foreach (explode("\n", $f) as $line) {
-
 
 
             if ($needClassStart) {
@@ -133,15 +150,17 @@ class MakeDoc extends Command
 
 
                 if (strpos($line, "@OA\Schema(") > 0) {
-                    $fout .= $line  ;
-                    $line="";
-                    $fout .=  $docScheme  ;
+                    $fout .= $line;
+                    $line = "";
+                    $fout .= $docScheme;
                 }
 
 
-                if (strpos($s, $needClassStart) === 0) {
-                    $fout .= "\n" . $docPropertyBlock . "\n";
-                    $needClassStart = null;
+                if($addingPropertyCount>0) {
+                    if (strpos($s, $needClassStart) === 0) {
+                        $fout .= "\n" . $docPropertyBlock . "\n";
+                        $needClassStart = null;
+                    }
                 }
 
 
@@ -151,9 +170,14 @@ class MakeDoc extends Command
         }
 
         $fout = trim($fout);
+
+        if($addingBottomClass!="") {
+            $fout = substr($fout, 0, strlen($fout)   - 1);
+            $fout .= $addingBottomClass . "\n }";
+        }
+
         $fout = str_replace("*/\n/**\n", "", $fout);
         $fout = str_replace("*/\n\n/**\n", "", $fout);
-
 
 
         file_put_contents($pTo, $fout);

@@ -24,7 +24,7 @@ class MakeMigration extends Command {
      *
      * @var string
      */
-    protected $description = 'Создать модель';
+    protected $description = 'Создать миграцию для модели';
 
     public static function CodeFormater( $f ) {
         $text = "";
@@ -90,6 +90,7 @@ class MakeMigration extends Command {
 
         $content = '<?php' . "\n" . $info['content'];
         $content = self::FixView($content);
+
 
         file_put_contents($path, $content);
 
