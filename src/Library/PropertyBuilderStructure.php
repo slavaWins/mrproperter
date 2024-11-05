@@ -35,6 +35,7 @@ class PropertyBuilderStructure
     public bool $is_hidden_property = false;
     public bool $is_nonEditable = false;
     public array $options;
+    public  $dynamicOptionCallbale = null;
     public $comment;
 
     /**
@@ -80,10 +81,33 @@ class PropertyBuilderStructure
     }
 
 
+    /**
+     * @param callable $call
+     * @return $this
+     */
+    public function SetDynamicOption(callable $call)
+    {
+      //  $this->options=[];
+        $this->dynamicOptionCallbale = $call;
+
+        return $this;
+    }
+
     public function SetOptions(array $array)
     {
         $this->options = $array;
         return $this;
+    }
+
+    public function GetOptions()
+    {
+
+
+        if($this->dynamicOptionCallbale && empty($this->options)){
+            $f = $this->dynamicOptionCallbale;
+            $this->options = $f($this->model);
+        }
+        return $this->options;
     }
 
 

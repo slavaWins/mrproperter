@@ -185,7 +185,7 @@ class MPModel extends Model
             FElement::New()->SetView()->H()->SetLabel($prop->label ?? $prop->name ?? "n/a")->RenderHtml(true);
 
             if (is_string($value))   $value = json_decode($value, true);
-            foreach ($prop->options as $K => $V) {
+            foreach ($prop->GetOptions() as $K => $V) {
                 $inp = FElement::NewInputText()->SetView()->InputBoolRow()->SetLabel($V ?? "na")
                     ->SetName($ind . '[]')
                     ->AddValueAttributeCheckbox($K)
@@ -206,7 +206,7 @@ class MPModel extends Model
 
 
         } elseif ($prop->typeData == "select") {
-            $inp = FElement::NewInputText()->SetView()->InputSelect()->AddOptionFromArray($prop->options);
+            $inp = FElement::NewInputText()->SetView()->InputSelect()->AddOptionFromArray($prop->GetOptions());
         }
 
 
