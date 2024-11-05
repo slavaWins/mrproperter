@@ -87,7 +87,7 @@ class PropertyBuilderStructure
      */
     public function SetDynamicOption(callable $call)
     {
-      //  $this->options=[];
+        $this->options=[];
         $this->dynamicOptionCallbale = $call;
 
         return $this;
@@ -206,8 +206,8 @@ class PropertyBuilderStructure
         }
 
         if ($this->typeData == "select") {
-            if (!isset($this->options[$this->value])) return "Опция не найдена";
-            return $this->options[$this->value];
+            if (!isset($this->GetOptions()[$this->value])) return "Опция не найдена";
+            return $this->GetOptions()[$this->value];
         }
 
 
@@ -222,8 +222,8 @@ class PropertyBuilderStructure
 
             $text = "";
             foreach ($val as $K=>$V){
-                if (isset($this->options[$K])){
-                    $text.=", ".$this->options[$K];
+                if (isset($this->GetOptions()[$K])){
+                    $text.=", ".$this->GetOptions()[$K];
                 }else {
                     $text .= ", " . $K;
                 }

@@ -112,7 +112,7 @@ class MPModel extends Model
         if ($propertyData->min) $text .= "|min:" . $propertyData->min;
         if ($propertyData->typeData == "select" or $propertyData->typeData == "multioption") {
             $text .= "|in:";
-            foreach ($propertyData->options as $K => $V) $text .= '"' . $K . '",';
+            foreach ($propertyData->GetOptions() as $K => $V) $text .= '"' . $K . '",';
             $text = trim($text, ",");
         }
         $text = trim($text, "|");
@@ -270,7 +270,7 @@ class MPModel extends Model
             if ($V->typeData == "multioption") {
 
                 $valueArray = [];
-                foreach ($V->options as $key => $_label) {
+                foreach ($V->GetOptions() as $key => $_label) {
                     if (in_array($key, $data[$K])) {
 
                         $valueArray[$key] = true;
