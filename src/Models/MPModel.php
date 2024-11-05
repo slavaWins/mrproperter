@@ -2,17 +2,13 @@
 
 namespace MrProperter\Models;
 
-use App\Models\User;
-use Illuminate\Support\Facades\Validator;
-use MrProperter\Library;
 use App\Library\MrProperter\MigrationRender;
 use App\Library\MrProperter\PropertyBuilderStructure;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Validator;
+use MrProperter\Library;
 use MrProperter\Library\PropertyConfigStructure;
 use SlavaWins\Formbuilder\Library\FElement;
-use Illuminate\Validation\Rule;
-use Illuminate\Support\Facades\Log;
 
 class MPModel extends Model
 {
@@ -52,6 +48,24 @@ class MPModel extends Model
         return $rules;
     }
 
+    public function GetValidateRulesInModel($tag = null, $isRequired = true)
+    {
+
+        $props = $this->GetByTag($tag);
+
+        $rules = [];
+
+        /**
+         * @var  $K
+         * @var PropertyBuilderStructure $prop
+         */
+        foreach ($props as $K => $prop) {
+            $rules[$K] = self::RenderValidateRuleByPropertyData($prop, $isRequired);
+        }
+
+        return $rules;
+    }
+
     /**
      * @param $requestArray
      * @param $tag
@@ -62,6 +76,15 @@ class MPModel extends Model
         $cln = get_called_class();
 
         $validator = Validator::make($requestArray, $cln::GetValidateRules($tag), [], $cln::GetValidateRulesFailedNames($tag));
+        return $validator;
+    }
+
+
+    public function GetValidatorRequestInModel($requestArray, $tag = null)
+    {
+        $cln = get_called_class();
+
+        $validator = Validator::make($requestArray, $this->GetValidateRulesInModel($tag), [], $cln::GetValidateRulesFailedNames($tag));
         return $validator;
 
     }
@@ -131,7 +154,7 @@ class MPModel extends Model
         $rules = [];
 
         $rules[$K] = self::RenderValidateRuleByPropertyData($props[$propertyName], $isRequired);
-        return $rules[$K] ;
+        return $rules[$K];
     }
 
     /**
@@ -184,7 +207,7 @@ class MPModel extends Model
         if ($prop->typeData == "multioption") {
             FElement::New()->SetView()->H()->SetLabel($prop->label ?? $prop->name ?? "n/a")->RenderHtml(true);
 
-            if (is_string($value))   $value = json_decode($value, true);
+            if (is_string($value)) $value = json_decode($value, true);
             foreach ($prop->GetOptions() as $K => $V) {
                 $inp = FElement::NewInputText()->SetView()->InputBoolRow()->SetLabel($V ?? "na")
                     ->SetName($ind . '[]')
@@ -217,17 +240,17 @@ class MPModel extends Model
             ->SetName($ind)
             ->SetDescr($prop->descr ?? null); //->FrontendValidate()->String(0, 75)
 
-        if($prop->max){
+        if ($prop->max) {
             $inp->FrontendValidate()->String($prop->min, $prop->max);
         }
 
         if ($prop->typeData == "string") {
-            if(is_object($value)){
-                if(get_class($value) == 'Illuminate\Support\Carbon'){
+            if (is_object($value)) {
+                if (get_class($value) == 'Illuminate\Support\Carbon') {
                     $value = $value->format("d.m.Y");
                 }
             }
-         //   $inp->FrontendValidate()->String($prop->min, $prop->max ?? 999999);
+            //   $inp->FrontendValidate()->String($prop->min, $prop->max ?? 999999);
         }
 
         $html = $inp->SetValue(old($ind, $value))
@@ -284,11 +307,14 @@ class MPModel extends Model
         }
     }
 
-    public function ValidateAndFilibleByRequest(array $data, $tag = null)
+
+    public function ValidateAndFilibleByRequest($data, $tag = null)
     {
 
         $cl = get_called_class();
-        $validator = $cl::GetValidatorRequest($data, $tag);
+
+        $validator = $this->GetValidatorRequestInModel($data, $tag);
+
         if ($validator->fails()) {
             return $validator->errors()->first();
         }
@@ -317,16 +343,16 @@ class MPModel extends Model
         return $this->propertestConfig;
     }
 
-    public function GetAllTags(){
+    public function GetAllTags()
+    {
         $list = [];
-        foreach ($this->GetProperties() as $K=>$V){
+        foreach ($this->GetProperties() as $K => $V) {
 
-            if(!$V->tags)continue;
-            foreach ($V->tags as $tag){
-                if(in_array($tag, $list))continue;
-                $list[] =$tag;
+            if (!$V->tags) continue;
+            foreach ($V->tags as $tag) {
+                if (in_array($tag, $list)) continue;
+                $list[] = $tag;
             }
-
 
 
         }
