@@ -122,6 +122,9 @@ class MakeDoc extends Command
             if (!$prop->default) $docPropertyBlock .= "|null ";
             $docPropertyBlock .= ' $' . $K . ' ' . ($prop->comment ?? $prop->label ?? $prop->descr ?? " ");
 
+            if ($prop->belongsMethod) {
+                $docPropertyBlock .= "\n * @property ".basenames($prop->belongsToClass).' '. $prop->belongsMethod ;
+            }
 
         }
         $docPropertyBlock .= "\n*/";
