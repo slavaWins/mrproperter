@@ -18,6 +18,7 @@
             if ($type == "checkbox") return 'boolean';
             if ($type == "float") return 'float';
             if ($type == "multioption") return 'string';
+            if ($type == "json") return 'json';
 
             return 'string';
         }
@@ -70,6 +71,11 @@
                 if ($prop->comment || $prop->descr || $prop->label) $data['comment'] = $prop->label;
 
                 if ($prop->typeData == "text") {
+                    unset($data['default']);
+                    $data['nullable'] = null;
+                }
+
+                if ($prop->typeData == "json") {
                     unset($data['default']);
                     $data['nullable'] = null;
                 }

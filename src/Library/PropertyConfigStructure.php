@@ -34,6 +34,18 @@ class PropertyConfigStructure
     /**
      * @return PropertyBuilderStructure
      */
+    public function Json($name)
+    {
+        $s = new PropertyBuilderStructure();
+        $s->name = $name;
+        $s->typeData = 'json';
+        $this->list[$name] = $s;
+        return $s;
+    }
+
+    /**
+     * @return PropertyBuilderStructure
+     */
     public function Multioption($name)
     {
         $s = new PropertyBuilderStructure();

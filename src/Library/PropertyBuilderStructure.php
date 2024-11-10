@@ -17,6 +17,7 @@ class PropertyBuilderStructure
     public $tags = null;
     public string $icon = "";
     public $default = 0;
+    public $listClassGeneric =null;
 
 
     public $max = null;
@@ -115,6 +116,12 @@ class PropertyBuilderStructure
     {
         $this->default = $val;
         $this->value = $val;
+        return $this;
+    }
+
+    public function ListClassGeneric($classType)
+    {
+        $this->listClassGeneric = $classType;
         return $this;
     }
 

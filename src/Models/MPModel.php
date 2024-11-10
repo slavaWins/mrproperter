@@ -6,6 +6,7 @@ use App\Library\MrProperter\MigrationRender;
 use App\Library\MrProperter\PropertyBuilderStructure;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Validator;
+use MrProperter\Helpers\ReadAttributesConfig;
 use MrProperter\Library;
 use MrProperter\Library\PropertyConfigStructure;
 use SlavaWins\Formbuilder\Library\FElement;
@@ -61,6 +62,7 @@ class MPModel extends Model
          */
         foreach ($props as $K => $prop) {
             $rules[$K] = self::RenderValidateRuleByPropertyData($prop, $isRequired);
+            if (!$rules[$K]) unset($rules[$K]);
         }
 
         return $rules;
@@ -80,11 +82,17 @@ class MPModel extends Model
     }
 
 
+
     public function GetValidatorRequestInModel($requestArray, $tag = null)
     {
         $cln = get_called_class();
 
         $validator = Validator::make($requestArray, $this->GetValidateRulesInModel($tag), [], $cln::GetValidateRulesFailedNames($tag));
+
+
+        Library\MrpValidateCommon::ValidateListGenerics($this, $validator, $requestArray, $tag);
+
+
         return $validator;
 
     }
@@ -131,6 +139,7 @@ class MPModel extends Model
         }
 
 
+        if ($propertyData->listClassGeneric) return null;
         if ($propertyData->max) $text .= "|max:" . $propertyData->max;
         if ($propertyData->min) $text .= "|min:" . $propertyData->min;
         if ($propertyData->typeData == "select" or $propertyData->typeData == "multioption") {
@@ -142,20 +151,6 @@ class MPModel extends Model
         return $text;
     }
 
-    public static function GetValidateRuleProperty($propertyName, $isRequired = true)
-    {
-        /** @var MPModel $cl */
-        $cln = get_called_class();
-        $cl = new $cln();
-        $props = $cl->GetProperties();
-        if (!isset($props[$propertyName])) {
-            throw new \Exception("Не найден параметр " . $propertyName . " в моделе " . $cln);
-        }
-        $rules = [];
-
-        $rules[$K] = self::RenderValidateRuleByPropertyData($props[$propertyName], $isRequired);
-        return $rules[$K];
-    }
 
     /**
      * получить коллекцию полей по определенному тегу то есть нам возвращается только те поля у которых есть стык либо возвращаются все если так равен
@@ -230,6 +225,8 @@ class MPModel extends Model
 
         } elseif ($prop->typeData == "select") {
             $inp = FElement::NewInputText()->SetView()->InputSelect()->AddOptionFromArray($prop->GetOptions());
+        } elseif ($prop->listClassGeneric) {
+            $inp = FElement::NewInputText()->SetView()->ListGenericClass()->SetExampleModel($prop->listClassGeneric);
         }
 
 
@@ -253,6 +250,17 @@ class MPModel extends Model
             //   $inp->FrontendValidate()->String($prop->min, $prop->max ?? 999999);
         }
 
+        if ($prop->listClassGeneric) {
+            if (!is_array($value)) $value = [];
+
+            $templateElement = new $prop->listClassGeneric();
+            $templateElement = (array)$templateElement;
+
+            $templateElement['__templateData'] = true;
+
+            $value[] = $templateElement;
+        }
+
         $html = $inp->SetValue(old($ind, $value))
             ->RenderHtml(true);
     }
@@ -268,44 +276,8 @@ class MPModel extends Model
     }
 
 
-    private
-        $propertestConfig;
+    private   $propertestConfig;
 
-    public function PropertyFillebleByTag($data, $tag = null)
-    {
-        $pros = $this->GetByTag($tag);
-        foreach ($pros as $K => $V) {
-
-            if (!isset($data[$K])) {
-                if ($V->typeData == "checkbox") {
-                    $data[$K] = false;
-                } else {
-                    continue;
-                }
-            }
-
-            if ($V->typeData == "checkbox") {
-                $_val = false;
-                if ($data[$K] == "on") $_val = true;
-                $data[$K] = $_val;
-            }
-
-            if ($V->typeData == "multioption") {
-
-                $valueArray = [];
-                foreach ($V->GetOptions() as $key => $_label) {
-                    if (in_array($key, $data[$K])) {
-
-                        $valueArray[$key] = true;
-                    }
-                }
-
-                $data[$K] = $valueArray;
-            }
-
-            $this->$K = $data[$K];
-        }
-    }
 
 
     public function ValidateAndFilibleByRequest($data, $tag = null)
@@ -319,7 +291,8 @@ class MPModel extends Model
             return $validator->errors()->first();
         }
 
-        $this->PropertyFillebleByTag($data, $tag);
+        Library\MrpValidateCommon::PropertyFillebleByTag($this, $data, $tag);
+
         $this->save();
         return true;
     }
