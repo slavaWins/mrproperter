@@ -42,7 +42,9 @@ class MrpValidateCommon
                     $vals = $data[$keyInReq];
 
                     for ($i = 0; $i < $minVal; $i++) {
-                        $resultValueArray[$i][$attr_Key] = $vals[$i];
+                        if(isset(  $vals[$i])) {
+                            $resultValueArray[$i][$attr_Key] = $vals[$i];
+                        }
                     }
                 }
                 //$data[$K] = $resultValueArray;
