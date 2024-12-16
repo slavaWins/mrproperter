@@ -297,6 +297,11 @@ class MPModel extends Model
         return true;
     }
 
+    public function PropertyFillebleByTag($data, $tag)
+    {
+        return   Library\MrpValidateCommon::PropertyFillebleByTag($this, $data, $tag);
+    }
+
     /**
      * @return Library\PropertyBuilderStructure[]
      */

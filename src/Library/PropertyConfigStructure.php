@@ -64,6 +64,15 @@ class PropertyConfigStructure
         return $s;
     }
 
+    public function Date($name)
+    {
+        $s = new PropertyBuilderStructure();
+        $s->name = $name;
+        $s->typeData = 'date';
+        $this->list[$name] = $s;
+        return $s;
+    }
+
     /**
      * @return PropertyBuilderStructure[]
      */

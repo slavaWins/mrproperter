@@ -2,6 +2,7 @@
 
 namespace MrProperter\Console\Commands;
 
+use Carbon\Carbon;
 use Illuminate\Console\Command;
 use MrProperter\Helpers\FinderParts;
 use MrProperter\Library\MigrationRender;
@@ -118,6 +119,7 @@ class MakeDoc extends Command
             $addingPropertyCount++;
             $_type = MigrationRender::GetType($prop->typeData);
             if($_type=="text")$_type="string";
+            if($_type=="timestamp")$_type="Carbon";
             $docPropertyBlock .= "\n * @property " . $_type;
             if (!$prop->default) $docPropertyBlock .= "|null ";
             $docPropertyBlock .= ' $' . $K . ' ' . ($prop->comment ?? $prop->label ?? $prop->descr ?? " ");
@@ -181,7 +183,8 @@ class MakeDoc extends Command
 
         $fout = str_replace("*/\n/**\n", "", $fout);
         $fout = str_replace("*/\n\n/**\n", "", $fout);
-
+        $fout = str_replace("*/\n\n/**\n", "", $fout);
+        $fout = preg_replace('/\*\/\s*\/\*\*/', '', $fout);
 
         file_put_contents($pTo, $fout);
 

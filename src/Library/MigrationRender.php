@@ -19,6 +19,7 @@
             if ($type == "float") return 'float';
             if ($type == "multioption") return 'string';
             if ($type == "json") return 'json';
+            if ($type == "date") return 'timestamp';
 
             return 'string';
         }
