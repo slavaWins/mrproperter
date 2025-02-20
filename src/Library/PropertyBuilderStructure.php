@@ -14,6 +14,7 @@ class PropertyBuilderStructure
     public string $label = "";
     public ?string $customValidationRule = null;
     public string $descr = "";
+    public string $placeholder = "";
     public $tags = null;
     public string $icon = "";
     public $default = 0;
@@ -28,6 +29,8 @@ class PropertyBuilderStructure
     public $belongsPropertyText = null;
     public string $typeData = "int";
     public $prefix;
+    public $visibleRule=null;
+    public array $labelsWithTag = [];
     public $postfix;
     private string $format = "";
     /**
@@ -53,6 +56,12 @@ class PropertyBuilderStructure
     public function SetDescr($val)
     {
         $this->descr = $val;
+        return $this;
+    }
+
+    public function SetPlaceholder($val)
+    {
+        $this->placeholder = $val;
         return $this;
     }
 
@@ -175,6 +184,26 @@ class PropertyBuilderStructure
     public function SetPrefix($val)
     {
         $this->prefix = $val;
+        return $this;
+    }
+
+
+    public function VisibleRuleIs($targetInput, $targetValue)
+    {
+        $this->visibleRule = [
+            "key"=>$targetInput,
+            "val"=>$targetValue,
+        ];
+        return $this;
+    }
+
+    public function SetLabelsWithTag($tag, $label, $placeholder = "", $description = "")
+    {
+        $this->labelsWithTag[$tag] = [
+            'label'=>$label,
+            'placeholder'=>$placeholder,
+            'description'=>$description,
+        ];
         return $this;
     }
 

@@ -3,11 +3,10 @@
 namespace MrProperter\Models;
 
 use App\Library\MrProperter\MigrationRender;
-use App\Library\MrProperter\PropertyBuilderStructure;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Validator;
-use MrProperter\Helpers\ReadAttributesConfig;
 use MrProperter\Library;
+use MrProperter\Library\PropertyBuilderStructure;
 use MrProperter\Library\PropertyConfigStructure;
 use SlavaWins\Formbuilder\Library\FElement;
 
@@ -20,8 +19,10 @@ class MPModel extends Model
      */
     public function PropertiesSetting()
     {
-
+        return $this->_propertyConfigStructure;
     }
+
+    public ?PropertyConfigStructure $_propertyConfigStructure = null;
 
     /**
      * функция Get validate Rules она нужна для того чтобы сгенерировать массив с данными которые можно будет использовать в валидации.
@@ -82,12 +83,11 @@ class MPModel extends Model
     }
 
 
-
     public function GetValidatorRequestInModel($requestArray, $tag = null)
     {
         $cln = get_called_class();
 
-        $validator = Validator::make($requestArray, $this->GetValidateRulesInModel($tag), [], $cln::GetValidateRulesFailedNames($tag));
+        $validator = Validator::make($requestArray, $this->GetValidateRulesInModel($tag), [], $this->GetValidateRulesFailedNamesInner($tag));
 
 
         Library\MrpValidateCommon::ValidateListGenerics($this, $validator, $requestArray, $tag);
@@ -97,12 +97,10 @@ class MPModel extends Model
 
     }
 
-    public static function GetValidateRulesFailedNames($tag = null)
+    public  function GetValidateRulesFailedNamesInner($tag = null)
     {
-        /** @var MPModel $cl */
-        $cln = get_called_class();
-        $cl = new $cln();
-        $props = $cl->GetByTag($tag);
+
+        $props = $this->GetByTag($tag);
 
         $rules = [];
 
@@ -115,6 +113,14 @@ class MPModel extends Model
         }
 
         return $rules;
+    }
+
+    public static function GetValidateRulesFailedNames($tag = null)
+    {
+        /** @var MPModel $cl */
+        $cln = get_called_class();
+        $cl = new $cln();
+        return $cl->GetValidateRulesFailedNamesInner($tag);
     }
 
     public static function RenderValidateRuleByPropertyData(Library\PropertyBuilderStructure $propertyData, $isRequired)
@@ -172,7 +178,7 @@ class MPModel extends Model
 
 
     public
-    function BuildInputAll($tag = null)
+    function BuildInputAll($tag = null, $isEcho = true)
     {
         $p = $this->GetProperties();
 
@@ -186,21 +192,39 @@ class MPModel extends Model
                 if (!isset($p[$K]->tags[$tag])) continue;
             }
 
-            $html .= $this->BuildInput($K);
+            $html .= $this->BuildInput($K, $tag, $isEcho);
         }
+
+        if(!$isEcho)return $html;
+        return null;
     }
+
 
     /**
      * @param $ind
-     * @param Library\PropertyBuilderStructure $prop
+     * @param PropertyBuilderStructure $prop
      * @param $value
-     * @return void
+     * @param $fromTag
+     * @return FElement[]
      */
-    public static function BuildInputByStruct($ind, $prop, $value)
+    public static function BuildFElementByStruct($ind, $prop, $value, $fromTag = null)
     {
 
+        $felements = [];
+
+        $label = $prop->label ?? $prop->name ?? "n/a";
+        $placeholder=   $prop->placeholder ?? null;
+        $descr =   $prop->descr ?? null;
+
+        if(isset($prop->labelsWithTag[$fromTag])){
+            $label = $prop->labelsWithTag[$fromTag]['label']  ?? $label;
+            $descr = $prop->labelsWithTag[$fromTag]['description'] ?? $placeholder;
+            $placeholder = $prop->labelsWithTag[$fromTag]['placeholder']  ?? $descr;
+        }
+
+
         if ($prop->typeData == "multioption") {
-            FElement::New()->SetView()->H()->SetLabel($prop->label ?? $prop->name ?? "n/a")->RenderHtml(true);
+            $felements[] = FElement::New()->SetView()->H()->SetLabel($label);
 
             if (is_string($value)) $value = json_decode($value, true);
             foreach ($prop->GetOptions() as $K => $V) {
@@ -208,9 +232,10 @@ class MPModel extends Model
                     ->SetName($ind . '[]')
                     ->AddValueAttributeCheckbox($K)
                     ->SetValue(isset($value[$K]));
-                $inp->RenderHtml(true);
+
+                $felements[] = $inp;
             }
-            return;
+            return $felements;
         }
 
         $inp = FElement::NewInputText();
@@ -231,11 +256,10 @@ class MPModel extends Model
 
 
         $inp = $inp
-            ->SetLabel($prop->label ?? $prop->name ?? "na")
-            ->SetLabel($prop->label ?? $prop->name ?? "na")
-            ->SetPlaceholder($prop->descr ?? null)
+            ->SetLabel($label)
+            ->SetPlaceholder($placeholder)
             ->SetName($ind)
-            ->SetDescr($prop->descr ?? null); //->FrontendValidate()->String(0, 75)
+            ->SetDescr($descr);
 
         if ($prop->max) {
             $inp->FrontendValidate()->String($prop->min, $prop->max);
@@ -247,7 +271,6 @@ class MPModel extends Model
                     $value = $value->format("d.m.Y");
                 }
             }
-            //   $inp->FrontendValidate()->String($prop->min, $prop->max ?? 999999);
         }
 
         if ($prop->listClassGeneric) {
@@ -261,23 +284,51 @@ class MPModel extends Model
             $value[] = $templateElement;
         }
 
-        $html = $inp->SetValue(old($ind, $value))
-            ->RenderHtml(true);
+        $felements[] = $inp;
+
+        return $felements;
+
     }
 
-    public function BuildInput($ind)
+    /**
+     * @param $ind
+     * @param Library\PropertyBuilderStructure $prop
+     * @param $value
+     * @return void
+     */
+    public static function BuildInputByStruct($ind, $prop, $value, $fromTag = null, $isEcho = true)
+    {
+
+        $felements = self::BuildFElementByStruct($ind, $prop, $value, $fromTag);
+        $html = '';
+
+        foreach ($felements as $felement){
+            $html.= $felement->SetValue(old($ind, $value))
+                ->RenderHtml($isEcho);
+
+        }
+
+
+        if(!$isEcho)return $html;
+        return null;
+
+    }
+
+
+    public function BuildInput($ind, $fromTag = null, $isEcho = true)
     {
         $p = $this->GetProperties();
         if (!isset($p[$ind])) return null;
         $prop = $p[$ind];
         $value = $this->$ind ?? $prop->default ?? "";
-        self::BuildInputByStruct($ind, $prop, $value);
 
+        $html = self::BuildInputByStruct($ind, $prop, $value, $fromTag, $isEcho);
+        if(!$isEcho)return $html;
+        return null;
     }
 
 
-    private   $propertestConfig;
-
+    private $propertestConfig;
 
 
     public function ValidateAndFilibleByRequest($data, $tag = null)
@@ -299,7 +350,7 @@ class MPModel extends Model
 
     public function PropertyFillebleByTag($data, $tag)
     {
-        return   Library\MrpValidateCommon::PropertyFillebleByTag($this, $data, $tag);
+        return Library\MrpValidateCommon::PropertyFillebleByTag($this, $data, $tag);
     }
 
     /**
