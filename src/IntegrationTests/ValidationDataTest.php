@@ -2,6 +2,7 @@
 
 
 use MrProperter\Library\PropertyConfigStructure;
+use MrProperter\Models\MPModel;
 use Tests\TestCase;
 
 class ValidationDataTest extends TestCase
@@ -9,6 +10,59 @@ class ValidationDataTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
+
+    }
+
+
+    public function test_ValidateGenerator()
+    {
+
+        $model = new \MrProperter\Models\MPModel();
+        $config = new PropertyConfigStructure($model);
+
+        $prop = $config->Int("companyTestName")->SetLabel("Your company")
+            ->SetDescr("Ex x descr")->SetDefault("")
+            ->SetPlaceholder("XX")
+            ->SetLabelsWithTag("companyTestName", "Wath client company name", "OtherPlaceholder", "Other Descr")
+            ->SetMin(2)->SetMax(4)
+            ->AddTag(['admin', 'companyTestName']);
+
+        $model->_propertyConfigStructure = $config;
+
+
+
+        $rules = MPModel::RenderValidateRuleByPropertyData($prop, true);
+        $this->assertStringContainsString("required|", $rules);
+
+
+        $rules = MPModel::RenderValidateRuleByPropertyData($prop, false);
+        $this->assertStringNotContainsString("required|", $rules);
+
+
+        $prop->SetRequired(false);
+        $rules = MPModel::RenderValidateRuleByPropertyData($prop, true);
+        $this->assertStringNotContainsString("required|", $rules);
+
+        $rules = MPModel::RenderValidateRuleByPropertyData($prop, false);
+        $this->assertStringNotContainsString("required|", $rules);
+
+
+        $prop->SetRequired(false);
+        $prop->SetMin(0);
+        $prop->typeData = "string";
+        $rules = MPModel::RenderValidateRuleByPropertyData($prop, true);
+        $this->assertStringContainsString("min:0", $rules);
+
+
+        $prop->SetRequired(false);
+        $prop->SetMin(0);
+        $prop->SetMax(null);
+        $prop->typeData = "string";
+        $rules = MPModel::RenderValidateRuleByPropertyData($prop, true);
+        $this->assertStringContainsString("max:255", $rules);
+
+
+
 
     }
 

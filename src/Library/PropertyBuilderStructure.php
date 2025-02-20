@@ -17,12 +17,13 @@ class PropertyBuilderStructure
     public string $placeholder = "";
     public $tags = null;
     public string $icon = "";
-    public $default = 0;
+    public $default = null;
+    public bool|null $required =null;
     public $listClassGeneric =null;
 
 
     public $max = null;
-    public $min = 0;
+    public $min = null;
     public $value = 0;
     public $belongsToClass = null;
     public $belongsMethod = null;
@@ -121,10 +122,21 @@ class PropertyBuilderStructure
     }
 
 
+    public function SetRequired(bool $val)
+    {
+        $this->required = $val;
+        return $this;
+    }
+
     public function SetDefault($val)
     {
         $this->default = $val;
         $this->value = $val;
+
+        if($val===null){
+            $this->required=false;
+        }
+
         return $this;
     }
 
@@ -197,13 +209,21 @@ class PropertyBuilderStructure
         return $this;
     }
 
-    public function SetLabelsWithTag($tag, $label, $placeholder = "", $description = "")
+    public function SetLabelsWithTag(array|string $tag, $label, $placeholder = "", $description = "")
     {
-        $this->labelsWithTag[$tag] = [
-            'label'=>$label,
-            'placeholder'=>$placeholder,
-            'description'=>$description,
-        ];
+        $_tags = $tag;
+
+        if(is_string($tag)){
+            $_tags = [$tag];
+        }
+
+        foreach ($_tags as $tag) {
+            $this->labelsWithTag[$tag] = [
+                'label' => $label,
+                'placeholder' => $placeholder,
+                'description' => $description,
+            ];
+        }
         return $this;
     }
 

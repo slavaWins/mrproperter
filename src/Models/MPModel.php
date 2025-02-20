@@ -127,11 +127,20 @@ class MPModel extends Model
     {
         if ($propertyData->customValidationRule) return $propertyData->customValidationRule;
 
+
+        if(!is_null($propertyData->required)) {
+            if ($propertyData->required === false) $isRequired = false;
+        }
+
         $text = "";
         if ($isRequired) $text = "required|";
 
 
-        $columType = Library\MigrationRender::GetType($propertyData->typeData);
+
+
+
+        $columTypeOriginal = Library\MigrationRender::GetType($propertyData->typeData);
+        $columType = $columTypeOriginal;
         if ($columType == "text") $columType = "string";
         if ($columType == "float") $columType = "numeric";
         $text .= $columType;
@@ -144,10 +153,20 @@ class MPModel extends Model
             return "array";
         }
 
+        if ($columType == "string") {
+            if (!$isRequired || $propertyData->min===0){
+                $text .= "|nullable";
+            }
+        }
 
         if ($propertyData->listClassGeneric) return null;
-        if ($propertyData->max) $text .= "|max:" . $propertyData->max;
-        if ($propertyData->min) $text .= "|min:" . $propertyData->min;
+        if ($propertyData->max>0) $text .= "|max:" . $propertyData->max;
+
+        if (!$propertyData->max &&  $columTypeOriginal == "string") {
+            $text .= "|max:255";
+        }
+
+        if (!is_null( $propertyData->min)) $text .= "|min:" . $propertyData->min;
         if ($propertyData->typeData == "select" or $propertyData->typeData == "multioption") {
             $text .= "|in:";
             foreach ($propertyData->GetOptions() as $K => $V) $text .= '"' . $K . '",';
@@ -260,6 +279,9 @@ class MPModel extends Model
             ->SetPlaceholder($placeholder)
             ->SetName($ind)
             ->SetDescr($descr);
+
+        $inp->data->visibleRule = $prop->visibleRule;
+
 
         if ($prop->max) {
             $inp->FrontendValidate()->String($prop->min, $prop->max);
