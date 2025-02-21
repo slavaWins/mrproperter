@@ -281,6 +281,8 @@ class MPModel extends Model
             ->SetDescr($descr);
 
         $inp->data->visibleRule = $prop->visibleRule;
+        $inp->data->prefix = $prop->prefix;
+        $inp->data->postfix = $prop->postfix;
 
 
         if ($prop->max) {
