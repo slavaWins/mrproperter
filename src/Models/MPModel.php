@@ -154,7 +154,11 @@ class MPModel extends Model
         }
 
         if ($columType == "string") {
-            if (!$isRequired || $propertyData->min===0){
+            if (!$isRequired){
+                $text .= "|nullable";
+            }
+            if ($propertyData->isCanEmpty===true){
+                $text = str_replace("required|","", $text);
                 $text .= "|nullable";
             }
         }
@@ -366,7 +370,11 @@ class MPModel extends Model
             return $validator->errors()->first();
         }
 
+        $data = $validator->validated();
+
         Library\MrpValidateCommon::PropertyFillebleByTag($this, $data, $tag);
+
+
 
         $this->save();
         return true;

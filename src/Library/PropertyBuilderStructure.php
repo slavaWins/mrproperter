@@ -19,6 +19,7 @@ class PropertyBuilderStructure
     public string $icon = "";
     public $default = null;
     public bool|null $required =null;
+    public bool|null $isCanEmpty =null;
     public $listClassGeneric =null;
 
 
@@ -125,6 +126,11 @@ class PropertyBuilderStructure
     public function SetRequired(bool $val)
     {
         $this->required = $val;
+        return $this;
+    }
+    public function CanEmpty(bool $val = true)
+    {
+        $this->isCanEmpty = $val;
         return $this;
     }
 

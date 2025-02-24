@@ -13,6 +13,8 @@ class MrpValidateCommon
     {
         $pros = $mrpModel->GetByTag($tag);
 
+
+
         foreach ($pros as $K => $prop) {
 
 
@@ -53,12 +55,17 @@ class MrpValidateCommon
                 continue;
             }
 
+
             if (!isset($data[$K])) {
+
                 if ($prop->typeData == "checkbox") {
-                    $data[$K] = false;
-                } else {
+                        $data[$K] = false;
+                }elseif ($prop->isCanEmpty === true && ($prop->typeData == "string" || $prop->typeData == "text") ) {
+                    $data[$K] = "";
+                }else{
                     continue;
                 }
+
             }
 
 
