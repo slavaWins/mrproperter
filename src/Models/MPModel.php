@@ -287,6 +287,8 @@ class MPModel extends Model
         $inp->data->visibleRule = $prop->visibleRule;
         $inp->data->prefix = $prop->prefix;
         $inp->data->postfix = $prop->postfix;
+        $inp->data->dataMask = $prop->frontendMask;
+        $inp->data->dataMaskReverse = $prop->frontendMaskReverse===true;
 
 
         if ($prop->max) {

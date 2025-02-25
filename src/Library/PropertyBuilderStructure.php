@@ -34,6 +34,8 @@ class PropertyBuilderStructure
     public $visibleRule=null;
     public array $labelsWithTag = [];
     public $postfix;
+    public ?string $frontendMask = null;
+    public ?bool $frontendMaskReverse = null;
     private string $format = "";
     /**
      * @var true
@@ -184,6 +186,13 @@ class PropertyBuilderStructure
     public function SetMin($val)
     {
         $this->min = $val;
+        return $this;
+    }
+
+    public function FrontendMask($mask, $isReverse = false)
+    {
+        $this->frontendMask = $mask;
+        $this->frontendMaskReverse = $isReverse;
         return $this;
     }
 

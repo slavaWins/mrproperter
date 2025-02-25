@@ -46,6 +46,18 @@ class RenderingWithTagTest extends TestCase
         $this->assertEquals("Other Descr", $felement->data->descr);
 
 
+
+        $prop->FrontendMask("00-00");
+        $felement = MPModel::BuildFElementByStruct("companyTestName", $prop, "", "companyTestName")[0];
+        $this->assertEquals("00-00", $felement->data->dataMask);
+        $this->assertEquals(false, $felement->data->dataMaskReverse);
+
+
+        $prop->FrontendMask("00-00", true);
+        $felement = MPModel::BuildFElementByStruct("companyTestName", $prop, "", "companyTestName")[0];
+        $this->assertEquals(true, $felement->data->dataMaskReverse);
+
+
     }
 
 
