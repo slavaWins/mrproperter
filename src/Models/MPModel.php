@@ -147,8 +147,9 @@ class MPModel extends Model
 
 
         if ($propertyData->typeData == 'checkbox') {
-            return "";
+            return "nullable";
         }
+
         if ($propertyData->typeData == 'multioption') {
             return "array";
         }

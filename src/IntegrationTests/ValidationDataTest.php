@@ -64,6 +64,14 @@ class ValidationDataTest extends TestCase
 
 
 
+        $prop->required  = null;
+        $prop->typeData = "checkbox";
+        $rules = MPModel::RenderValidateRuleByPropertyData($prop, true);
+        $this->assertStringContainsString("nullable", $rules);
+
+
+
+
     }
 
     public function test_ValidateString()
