@@ -304,16 +304,7 @@ class MPModel extends Model
             }
         }
 
-        if ($prop->listClassGeneric) {
-            if (!is_array($value)) $value = [];
 
-            $templateElement = new $prop->listClassGeneric();
-            $templateElement = (array)$templateElement;
-
-            $templateElement['__templateData'] = true;
-
-            $value[] = $templateElement;
-        }
 
         $felements[] = $inp;
 
@@ -332,6 +323,21 @@ class MPModel extends Model
 
         $felements = self::BuildFElementByStruct($ind, $prop, $value, $fromTag);
         $html = '';
+
+        //Что бы для listClassGeneric был темлпейт элемент, даже если value пустой
+        if ($prop->listClassGeneric) {
+            if (!is_array($value)) $value = [];
+
+            $templateElement = new $prop->listClassGeneric();
+            $templateElement = (array)$templateElement;
+            $templateElement['__templateData'] = true;
+
+            $value[] = $templateElement;
+
+            $value = collect($value)->filter(function ($item) {
+                return !empty($item);
+            })->toArray();
+        }
 
         foreach ($felements as $felement){
             $html.= $felement->SetValue(old($ind, $value))
@@ -373,10 +379,14 @@ class MPModel extends Model
             return $validator->errors()->first();
         }
 
-        $data = $validator->validated();
+        $dataValidated = $validator->validated();
 
-        Library\MrpValidateCommon::PropertyFillebleByTag($this, $data, $tag);
+        foreach ($data as $K => $V) {
+            if(strpos($K,"__")>0 && is_array($V))$dataValidated[$K]=$V;
+        }
 
+
+        Library\MrpValidateCommon::PropertyFillebleByTag($this, $dataValidated, $tag);
 
 
         $this->save();

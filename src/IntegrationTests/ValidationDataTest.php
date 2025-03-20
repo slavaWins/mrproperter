@@ -1,6 +1,7 @@
 <?php
 
 
+use MrProperter\IntegrationTests\ExampleGenericListContract;
 use MrProperter\Library\PropertyConfigStructure;
 use MrProperter\Models\MPModel;
 use Tests\TestCase;
@@ -28,7 +29,6 @@ class ValidationDataTest extends TestCase
             ->AddTag(['admin', 'companyTestName']);
 
         $model->_propertyConfigStructure = $config;
-
 
 
         $rules = MPModel::RenderValidateRuleByPropertyData($prop, true);
@@ -62,14 +62,10 @@ class ValidationDataTest extends TestCase
         $this->assertStringContainsString("max:255", $rules);
 
 
-
-
-        $prop->required  = null;
+        $prop->required = null;
         $prop->typeData = "checkbox";
         $rules = MPModel::RenderValidateRuleByPropertyData($prop, true);
         $this->assertStringContainsString("nullable", $rules);
-
-
 
 
     }
@@ -215,5 +211,44 @@ class ValidationDataTest extends TestCase
 
     }
 
+ 
+
+    public function test_Validate_listClassGeneric()
+    {
+
+        $model = new \MrProperter\Models\MPModel();
+        $config = new PropertyConfigStructure($model);
+
+        $prop = $config->Json("commissionCurrence_CNY")->SetLabel("Your company")
+            ->SetDefault([])
+            ->ListClassGeneric(ExampleGenericListContract::class)
+            ->AddTag(['admin', 'companyTestName']);
+
+        $model->_propertyConfigStructure = $config;
+
+        $req = [
+            'commissionCurrence_CNY__amountMax' => [1,2],
+            'commissionCurrence_CNY__percentAgent' => [1,2],
+        ];
+
+        MPModel::saving(function () {
+            return false;
+        });
+
+        $res = $model->ValidateAndFilibleByRequest($req, "admin");
+        $this->assertTrue($res);
+
+
+
+        $this->assertEquals(2, $model->commissionCurrence_CNY[1]['amountMax']);
+        $this->assertEquals(2, $model->commissionCurrence_CNY[1]['percentAgent']);
+
+
+
+        //not key data
+        $prop->name = "other";
+        $res = $model->ValidateAndFilibleByRequest($req, "admin");
+        $this->assertStringContainsString("Your company", $res);
+    }
 
 }
