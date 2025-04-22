@@ -83,9 +83,27 @@ class MPModel extends Model
     }
 
 
+    public function FixValueCommaForDot($requestArray, $tag = null):array{
+        $props = $this->GetByTag($tag);
+
+        $rules = [];
+
+        /**
+         * @var  $K
+         * @var PropertyBuilderStructure $prop
+         */
+        foreach ($props as $K => $prop) {
+            if($prop->typeData!="float")continue;
+            $requestArray[$K]= str_replace(",",".",$requestArray[$K]);
+        }
+        return $requestArray;
+    }
+
     public function GetValidatorRequestInModel($requestArray, $tag = null)
     {
         $cln = get_called_class();
+
+        $requestArray = $this->FixValueCommaForDot($requestArray, $tag);
 
         $validator = Validator::make($requestArray, $this->GetValidateRulesInModel($tag), [], $this->GetValidateRulesFailedNamesInner($tag));
 

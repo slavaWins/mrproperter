@@ -14,10 +14,7 @@ class MrpValidateCommon
         $pros = $mrpModel->GetByTag($tag);
 
 
-
-
         foreach ($pros as $K => $prop) {
-
 
 
             if ($prop->listClassGeneric) {
@@ -45,14 +42,21 @@ class MrpValidateCommon
                     $vals = $data[$keyInReq];
 
                     for ($i = 0; $i < $minVal; $i++) {
-                        if(isset(  $vals[$i])) {
-                            $resultValueArray[$i][$attr_Key] = $vals[$i];
+                        if (isset($vals[$i])) {
+                            $_v =  $vals[$i];
+
+                            if($classAttributes[$attr_Key]["Type"]=="float"){
+                                $_v = str_replace(",",".",$_v);
+                                $_v = floatval($_v);
+                            }
+                            if($classAttributes[$attr_Key]["Type"]=="int")$_v = intval($_v);
+                            $resultValueArray[$i][$attr_Key] = $_v;
                         }
                     }
                 }
                 //$data[$K] = $resultValueArray;
 
-                $mrpModel->$K =  $resultValueArray;
+                $mrpModel->$K = $resultValueArray;
                 continue;
             }
 
@@ -60,10 +64,10 @@ class MrpValidateCommon
             if (!isset($data[$K])) {
 
                 if ($prop->typeData == "checkbox") {
-                        $data[$K] = false;
-                }elseif ($prop->isCanEmpty === true && ($prop->typeData == "string" || $prop->typeData == "text") ) {
+                    $data[$K] = false;
+                } elseif ($prop->isCanEmpty === true && ($prop->typeData == "string" || $prop->typeData == "text")) {
                     $data[$K] = "";
-                }else{
+                } else {
                     continue;
                 }
 
@@ -109,6 +113,7 @@ class MrpValidateCommon
     public static function ValidateListGenerics(MPModel $mrpModel, $validator, $requestArray, $tag = null)
     {
 
+        // dd($requestArray);
         foreach ($mrpModel->GetByTag($tag) as $K => $prop) {
             if (empty($prop->listClassGeneric)) continue;
             $msg = null;
@@ -126,9 +131,11 @@ class MrpValidateCommon
                 $countLists = count($vals);
 
 
+                $_msgTemplate = "В столбце " . $attr_Data['Name'] . ', в строчке ';
+
 
                 if (isset($attr_Data['Options'])) {
-                    foreach ($vals as $valueVariant) {
+                    foreach ($vals as $line => $valueVariant) {
                         if (!isset($attr_Data['Options'][$valueVariant])) {
 
                             $msg = "В поле " . $attr_Data['Name'] . ' указан не верный тип';
@@ -150,11 +157,21 @@ class MrpValidateCommon
                         }
                     }
 
+
                     if (isset($attr_Data['Lengh']) and $attr_Data['Type'] == "int") {
-                        foreach ($vals as $valueVariant) {
+                        foreach ($vals as $line => $valueVariant) {
                             $len = intval($valueVariant);
+
+
+                            if (preg_match('/^[\d]+$/', $valueVariant . '') !== 1) {
+                                $msg = $_msgTemplate . ($line + 1) . ' должно быть целое число. Без пробелов и лишних символов';
+                                break;
+                                break;
+                            }
+
+
                             if ($len < $attr_Data['Lengh'][0] or $len > $attr_Data['Lengh'][1]) {
-                                $msg = "Поле " . $attr_Data['Name'] . ' должно иметь длинну от ' . $attr_Data['Lengh'][0] . ' до ' . $attr_Data['Lengh'][1];
+                                $msg = $_msgTemplate . ($line + 1) . ' должно быть в пределах от ' . $attr_Data['Lengh'][0] . ' до ' . $attr_Data['Lengh'][1];
                                 break;
                                 break;
                             }
@@ -162,10 +179,26 @@ class MrpValidateCommon
                     }
 
                     if (isset($attr_Data['Lengh']) and $attr_Data['Type'] == "float") {
-                        foreach ($vals as $valueVariant) {
+                        foreach ($vals as $line => $valueVariant) {
+
+                            if (preg_match('/^[\d.,]+$/', $valueVariant . '') !== 1) {
+                                $msg = $_msgTemplate . ($line + 1) . ' должно быть число, без букв и лишних символов';
+                                break;
+                                break;
+                            }
+
+                            $valueVariant = str_replace(',', '.', $valueVariant);
+
+                            if (floatval($valueVariant) . '' !== $valueVariant) {
+                                $msg = $_msgTemplate . ($line + 1) . ' должно быть корректное значение';
+                                break;
+                                break;
+                            }
+
+
                             $len = floatval($valueVariant);
                             if ($len < $attr_Data['Lengh'][0] or $len > $attr_Data['Lengh'][1]) {
-                                $msg = "Поле " . $attr_Data['Name'] . ' должно иметь длинну от ' . $attr_Data['Lengh'][0] . ' до ' . $attr_Data['Lengh'][1];
+                                $msg = $_msgTemplate . ($line + 1) . ' должно быть в пределах от ' . $attr_Data['Lengh'][0] . ' до ' . $attr_Data['Lengh'][1];
                                 break;
                                 break;
                             }
