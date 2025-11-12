@@ -14,6 +14,8 @@ class ReadAttributesConfig
         $class = new ReflectionClass( ($classExamle));
         $result = [];
 
+        $attributesData['DefaultValue'] =  $property->getDefaultValue();
+
         foreach ($class->getProperties() as $property) {
             $propertyName = $property->getName();
             $attributesData = [];
