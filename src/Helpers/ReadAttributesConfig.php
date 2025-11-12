@@ -14,11 +14,12 @@ class ReadAttributesConfig
         $class = new ReflectionClass( ($classExamle));
         $result = [];
 
-        $attributesData['DefaultValue'] =  $property->getDefaultValue();
 
         foreach ($class->getProperties() as $property) {
             $propertyName = $property->getName();
             $attributesData = [];
+            
+            $attributesData['DefaultValue'] =  $property->getDefaultValue();
 
             // Получение атрибутов для каждого свойства
             foreach ($property->getAttributes() as $attribute) {
