@@ -211,7 +211,7 @@ class ValidationDataTest extends TestCase
 
     }
 
- 
+
 
     public function test_Validate_listClassGeneric()
     {
@@ -248,7 +248,22 @@ class ValidationDataTest extends TestCase
         //not key data
         $prop->name = "other";
         $res = $model->ValidateAndFilibleByRequest($req, "admin");
-        $this->assertStringContainsString("Your company", $res);
+        $this->assertStringContainsString("В списке нет данных", $res);
+
+
+
+        $prop->name = "commissionCurrence_CNY";
+        $prop->listClassGenericAfterValidationAction = function($req){
+            if($req['commissionCurrence_CNY__amountMax'][0]==1)return "Первое значение должно быть не 1";
+          return null;
+        };
+        $res = $model->ValidateAndFilibleByRequest($req, "admin");
+        $this->assertStringContainsString("Первое значение", $res);
+
+
+
+
+
     }
 
 }

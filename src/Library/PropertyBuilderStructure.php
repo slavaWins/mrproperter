@@ -21,6 +21,7 @@ class PropertyBuilderStructure
     public bool|null $required =null;
     public bool|null $isCanEmpty =null;
     public $listClassGeneric =null;
+    public $listClassGenericAfterValidationAction = null;
 
 
     public $max = null;
@@ -151,6 +152,13 @@ class PropertyBuilderStructure
     public function ListClassGeneric($classType)
     {
         $this->listClassGeneric = $classType;
+        return $this;
+    }
+
+
+    public function ListClassGenericAfterValidation($action)
+    {
+        $this->listClassGenericAfterValidationAction = $action;
         return $this;
     }
 

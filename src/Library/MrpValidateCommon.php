@@ -209,6 +209,14 @@ class MrpValidateCommon
             }
 
 
+            if(!$msg) {
+                if ($prop->listClassGenericAfterValidationAction) {
+                    $action =  $prop->listClassGenericAfterValidationAction;
+                    $msg = $action($requestArray);
+                }
+            }
+
+
             if ($countLists == 0) {
                 $msg = "В списке нет данных";
             }
@@ -216,7 +224,7 @@ class MrpValidateCommon
 
             if ($msg) {
                 $validator->after(function ($validator) use ($K, $prop, $msg) {
-                    $validator->errors()->add($K, $prop->label . ': ' . $msg . ' ');
+                    $validator->errors()->add($K,   $msg . ' ');
                 });
             }
         }
