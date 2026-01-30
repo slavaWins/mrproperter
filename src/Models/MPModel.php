@@ -84,7 +84,8 @@ class MPModel extends Model
     }
 
 
-    public function FixValueCommaForDot($requestArray, $tag = null):array{
+    public function FixValueCommaForDot($requestArray, $tag = null): array
+    {
         $props = $this->GetByTag($tag);
 
         $rules = [];
@@ -94,8 +95,8 @@ class MPModel extends Model
          * @var PropertyBuilderStructure $prop
          */
         foreach ($props as $K => $prop) {
-            if($prop->typeData!="float")continue;
-            $requestArray[$K]= str_replace(",",".",$requestArray[$K]);
+            if ($prop->typeData != "float") continue;
+            $requestArray[$K] = str_replace(",", ".", $requestArray[$K]);
         }
         return $requestArray;
     }
@@ -116,7 +117,7 @@ class MPModel extends Model
 
     }
 
-    public  function GetValidateRulesFailedNamesInner($tag = null)
+    public function GetValidateRulesFailedNamesInner($tag = null)
     {
 
         $props = $this->GetByTag($tag);
@@ -147,15 +148,12 @@ class MPModel extends Model
         if ($propertyData->customValidationRule) return $propertyData->customValidationRule;
 
 
-        if(!is_null($propertyData->required)) {
+        if (!is_null($propertyData->required)) {
             if ($propertyData->required === false) $isRequired = false;
         }
 
         $text = "";
         if ($isRequired) $text = "required|";
-
-
-
 
 
         $columTypeOriginal = Library\MigrationRender::GetType($propertyData->typeData);
@@ -174,23 +172,23 @@ class MPModel extends Model
         }
 
         if ($columType == "string") {
-            if (!$isRequired){
+            if (!$isRequired) {
                 $text .= "|nullable";
             }
-            if ($propertyData->isCanEmpty===true){
-                $text = str_replace("required|","", $text);
+            if ($propertyData->isCanEmpty === true) {
+                $text = str_replace("required|", "", $text);
                 $text .= "|nullable";
             }
         }
 
         if ($propertyData->listClassGeneric) return null;
-        if ($propertyData->max>0) $text .= "|max:" . $propertyData->max;
+        if ($propertyData->max > 0) $text .= "|max:" . $propertyData->max;
 
-        if (!$propertyData->max &&  $columTypeOriginal == "string") {
+        if (!$propertyData->max && $columTypeOriginal == "string") {
             $text .= "|max:255";
         }
 
-        if (!is_null( $propertyData->min)) $text .= "|min:" . $propertyData->min;
+        if (!is_null($propertyData->min)) $text .= "|min:" . $propertyData->min;
         if ($propertyData->typeData == "select" or $propertyData->typeData == "multioption") {
             $text .= "|in:";
             foreach ($propertyData->GetOptions() as $K => $V) $text .= '"' . $K . '",';
@@ -238,7 +236,7 @@ class MPModel extends Model
             $html .= $this->BuildInput($K, $tag, $isEcho);
         }
 
-        if(!$isEcho)return $html;
+        if (!$isEcho) return $html;
         return null;
     }
 
@@ -256,13 +254,13 @@ class MPModel extends Model
         $felements = [];
 
         $label = $prop->label ?? $prop->name ?? "n/a";
-        $placeholder=   $prop->placeholder ?? null;
-        $descr =   $prop->descr ?? null;
+        $placeholder = $prop->placeholder ?? null;
+        $descr = $prop->descr ?? null;
 
-        if(isset($prop->labelsWithTag[$fromTag])){
-            $label = $prop->labelsWithTag[$fromTag]['label']  ?? $label;
+        if (isset($prop->labelsWithTag[$fromTag])) {
+            $label = $prop->labelsWithTag[$fromTag]['label'] ?? $label;
             $descr = $prop->labelsWithTag[$fromTag]['description'] ?? $placeholder;
-            $placeholder = $prop->labelsWithTag[$fromTag]['placeholder']  ?? $descr;
+            $placeholder = $prop->labelsWithTag[$fromTag]['placeholder'] ?? $descr;
         }
 
 
@@ -308,7 +306,7 @@ class MPModel extends Model
         $inp->data->prefix = $prop->prefix;
         $inp->data->postfix = $prop->postfix;
         $inp->data->dataMask = $prop->frontendMask;
-        $inp->data->dataMaskReverse = $prop->frontendMaskReverse===true;
+        $inp->data->dataMaskReverse = $prop->frontendMaskReverse === true;
 
 
         if ($prop->max) {
@@ -322,7 +320,6 @@ class MPModel extends Model
                 }
             }
         }
-
 
 
         $felements[] = $inp;
@@ -358,14 +355,14 @@ class MPModel extends Model
             })->toArray();
         }
 
-        foreach ($felements as $felement){
-            $html.= $felement->SetValue(old($ind, $value))
+        foreach ($felements as $felement) {
+            $html .= $felement->SetValue(old($ind, $value))
                 ->RenderHtml($isEcho);
 
         }
 
 
-        if(!$isEcho)return $html;
+        if (!$isEcho) return $html;
         return null;
 
     }
@@ -379,7 +376,7 @@ class MPModel extends Model
         $value = $this->$ind ?? $prop->default ?? "";
 
         $html = self::BuildInputByStruct($ind, $prop, $value, $fromTag, $isEcho);
-        if(!$isEcho)return $html;
+        if (!$isEcho) return $html;
         return null;
     }
 
@@ -401,13 +398,12 @@ class MPModel extends Model
         $dataValidated = $validator->validated();
 
         foreach ($data as $K => $V) {
-            if(strpos($K,"__")>0 && is_array($V))$dataValidated[$K]=$V;
+            if (strpos($K, "__") > 0 && is_array($V)) $dataValidated[$K] = $V;
 
-            if(!is_array($V))$dataValidated[$K]=  Purifier::clean($dataValidated[$K], ['AutoFormat.AutoParagraph'=>false]);
+            if (!empty($dataValidated[$K])  && !is_array($V) && !is_bool($V) && !is_int($V) && !is_float($V)) {
+                $dataValidated[$K] = Purifier::clean($dataValidated[$K], ['AutoFormat.AutoParagraph' => false]);
+            }
         }
-
-
-
 
 
         Library\MrpValidateCommon::PropertyFillebleByTag($this, $dataValidated, $tag);

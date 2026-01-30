@@ -77,8 +77,9 @@ class MrpValidateCommon
 
             if ($prop->typeData == "checkbox") {
                 $_val = false;
-                if ($data[$K] == "on") $_val = true;
-                $data[$K] = $_val;
+                if ($data[$K] == "on" || $data[$K] == 1 || $data[$K] == "true" || $data[$K] == "1") $_val = true;
+                $mrpModel->$K  = $_val;
+                continue;
             }
 
             if ($prop->typeData == "multioption") {
@@ -96,8 +97,9 @@ class MrpValidateCommon
 
 
 
+
             $mrpModel->$K =  Purifier::clean( $data[$K], ['AutoFormat.AutoParagraph'=>false]);
-          //  $mrpModel->$K = $data[$K];
+
         }
     }
 

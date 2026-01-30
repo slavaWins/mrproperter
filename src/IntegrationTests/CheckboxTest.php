@@ -26,6 +26,10 @@ class CheckboxTest extends TestCase
             ->SetDescr("Ex x descr")->SetDefault(false)
             ->AddTag(['admin', 'companyTestName']);
 
+        MPModel::saving(function () {
+            return false;
+        });
+
         $model->_propertyConfigStructure = $config;
 
         $req = [
@@ -43,6 +47,7 @@ class CheckboxTest extends TestCase
 
 
 
+
         $this->assertEquals(true, $data['companyTestName']);
 
 
@@ -53,8 +58,10 @@ class CheckboxTest extends TestCase
         ];
         $validator = $model->GetValidatorRequestInModel($req, "admin");
         $this->assertEquals(0, $validator->errors()->count());
+
         \MrProperter\Library\MrpValidateCommon::PropertyFillebleByTag($model, $req, "admin");
         $this->assertEquals(false, $model->companyTestName);
+        $this->assertEquals(0, $model->companyTestName);
 
 
     }
