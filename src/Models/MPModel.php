@@ -5,6 +5,7 @@ namespace MrProperter\Models;
 use App\Library\MrProperter\MigrationRender;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Validator;
+use Mews\Purifier\Facades\Purifier;
 use MrProperter\Library;
 use MrProperter\Library\PropertyBuilderStructure;
 use MrProperter\Library\PropertyConfigStructure;
@@ -401,7 +402,12 @@ class MPModel extends Model
 
         foreach ($data as $K => $V) {
             if(strpos($K,"__")>0 && is_array($V))$dataValidated[$K]=$V;
+
+            if(!is_array($V))$dataValidated[$K]=  Purifier::clean($dataValidated[$K], ['AutoFormat.AutoParagraph'=>false]);
         }
+
+
+
 
 
         Library\MrpValidateCommon::PropertyFillebleByTag($this, $dataValidated, $tag);

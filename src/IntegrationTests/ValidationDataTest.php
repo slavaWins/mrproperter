@@ -14,7 +14,6 @@ class ValidationDataTest extends TestCase
 
     }
 
-
     public function test_ValidateGenerator()
     {
 
@@ -66,7 +65,6 @@ class ValidationDataTest extends TestCase
         $prop->typeData = "checkbox";
         $rules = MPModel::RenderValidateRuleByPropertyData($prop, true);
         $this->assertStringContainsString("nullable", $rules);
-
 
     }
 

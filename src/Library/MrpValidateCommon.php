@@ -2,6 +2,7 @@
 
 namespace MrProperter\Library;
 
+use Mews\Purifier\Facades\Purifier;
 use MrProperter\Helpers\ReadAttributesConfig;
 use MrProperter\Models\MPModel;
 
@@ -93,7 +94,10 @@ class MrpValidateCommon
                 $data[$K] = $valueArray;
             }
 
-            $mrpModel->$K = $data[$K];
+
+
+            $mrpModel->$K =  Purifier::clean( $data[$K], ['AutoFormat.AutoParagraph'=>false]);
+          //  $mrpModel->$K = $data[$K];
         }
     }
 
