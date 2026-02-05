@@ -37,7 +37,7 @@ class PropertyBuilderStructure
     public $postfix;
     public ?string $frontendMask = null;
     public ?bool $frontendMaskReverse = null;
-    private string $format = "";
+    public string $format = "";
     /**
      * @var true
      */
@@ -207,6 +207,29 @@ class PropertyBuilderStructure
     public function FormatMoney()
     {
         $this->format = 'money';
+        return $this;
+    }
+
+    public function FrontendValidation_Money()
+    {
+        $this->format = 'money';
+        return $this;
+    }
+
+    public function FrontendValidation_InnAny()
+    {
+        $this->format = 'InnAny';
+        return $this;
+    }
+    public function FrontendValidation_Digital()
+    {
+        $this->format = 'Digital';
+        return $this;
+    }
+
+    public function FrontendValidation_Custom($v)
+    {
+        $this->format = $v;
         return $this;
     }
 

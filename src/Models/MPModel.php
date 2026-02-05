@@ -309,8 +309,15 @@ class MPModel extends Model
         $inp->data->dataMaskReverse = $prop->frontendMaskReverse === true;
 
 
+
+
         if ($prop->max) {
             $inp->FrontendValidate()->String($prop->min, $prop->max);
+        }
+
+
+        if($prop->format != null && !empty($prop->format)){
+            $inp->data->frontendValidate = $prop->format;
         }
 
         if ($prop->typeData == "string") {
