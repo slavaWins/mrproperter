@@ -66,3 +66,56 @@ php artisan vendor:publish --provider="MrProperter\Providers\MrProperterServiceP
  ``` 
 
 
+## Документация
+
+Свойства модели описываются **один раз** в `PropertiesSetting()`. Из этого описания получаются миграция, phpdoc, правила валидации, HTML-формы и заполнение модели из запроса.
+
+### Модель
+```php
+class Player extends MPModel
+{
+    public function PropertiesSetting()
+    {
+        $config = new PropertyConfigStructure($this);
+        $config->String('name')->SetLabel('Имя')->SetMin(2)->SetMax(40)->AddTag(['profile']);
+        $config->Int('level')->SetLabel('Уровень')->SetDefault(1)->NonEditable();
+        $config->Select('class')->SetLabel('Класс')->SetOptions(['war'=>'Воин','mag'=>'Маг'])->AddTag(['profile']);
+        $config->Checkbox('is_pro')->SetLabel('PRO')->AddTag(['admin']);
+        return $config;
+    }
+}
+```
+**Типы:** `String`, `Text`, `Int`, `Float`, `Checkbox`, `Select`, `Multioption`, `Date`, `Json`.
+**Модификаторы:** `SetLabel`, `SetDescr`, `SetPlaceholder`, `Comment`, `SetDefault`, `SetRequired`, `CanEmpty`, `SetMin`, `SetMax`, `SetValidationRule` (заменяет авто-правило), `AddTag`, `SetOptions` / `SetDynamicOption(fn)`, `SetBelong($class, $method, $prop)`, `ListClassGeneric($class)` (+ `ListClassGenericAfterValidation(fn)`), `Hidden`, `NonEditable` (поле не выводится в форме и никогда не записывается из запроса), `SetPrefix`/`SetPostfix`, `FrontendMask`, `FrontendValidation_Money|Digital|InnAny|Custom`, `VisibleRuleIs($input, $value)`, `SetLabelsWithTag($tag, $label, $ph, $descr)`.
+
+### Теги
+Тег — это именованный набор полей, одна форма или вкладка. `GetByTag('profile')` возвращает только поля с этим тегом.
+`ValidateAndFilibleByRequest` без тега бросает исключение. Не вешайте пользовательские теги на служебные поля (`is_admin`, `balance`…).
+
+### Сохранение из запроса
+```php
+$result = $player->ValidateAndFilibleByRequest($request->all(), 'profile');
+if ($result !== true) return ResponseApi::Error($result); // текст первой ошибки
+```
+Метод валидирует поля тега, чистит строки с HTML через HTMLPurifier (строки без `<`/`>` не трогаются), заполняет модель (кроме NonEditable) и делает `save()`.
+Ещё есть: `GetValidatorRequestInModel($data, $tag)`, `GetFillDataFromValidator($validator, $data, $tag)` (данные для записи после валидации), `GetValidateRulesInModel($tag)`, `PropertyFillebleByTag($data, $tag)` (без валидации!).
+
+### Вывод формы
+```blade
+{!! $player->BuildInputAll('profile', false) !!}   {{-- все поля тега --}}
+{{ $player->BuildInput('name') }}                  {{-- одно поле (echo) --}}
+<x-mrp-form route="{{ route('player.save') }}" btn="Сохранить">…</x-mrp-form>
+```
+Отрисовкой занимается `slavawins/formbuilder`. Ajax-отправку форм `.mprForm` делает `public/js/mrpform.js`.
+
+### List-generic
+`ListClassGeneric(MyRow::class)` — поле-таблица. Колонки описываются PHP-атрибутами на свойствах класса строки (`#[Name]`, `#[Description]`, `#[Type]`, `#[Lengh(min,max)]`, `#[Options([...])]`). Из запроса приходят массивы `field__column[]`.
+
+### Консоль
+```
+php artisan mrp:model Player        # заготовка модели
+php artisan mrp:migration Player    # миграция (create или только новые колонки)
+php artisan mrp:doc Player          # @property phpdoc
+php artisan mrp:all Player
+```
+Примеры: `vendor:publish --provider="MrProperter\Providers\MrProperterServiceProvider"` → `ExampleMPModel`, `MrProperterController`.

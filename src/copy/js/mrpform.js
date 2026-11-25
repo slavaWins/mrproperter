@@ -59,7 +59,7 @@ MrpForm.New = function (e) {
             self.OnSended();
             if (error) {
                 self.errorDiv.show();
-                self.errorDiv.html(error);
+                self.errorDiv.text(error);
                 return;
             }
 

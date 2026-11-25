@@ -6,6 +6,7 @@ use App\Library\MrProperter\MigrationRender;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Validator;
 use Mews\Purifier\Facades\Purifier;
+use MrProperter\Helpers\ReadAttributesConfig;
 use MrProperter\Library;
 use MrProperter\Library\PropertyBuilderStructure;
 use MrProperter\Library\PropertyConfigStructure;
@@ -96,6 +97,7 @@ class MPModel extends Model
          */
         foreach ($props as $K => $prop) {
             if ($prop->typeData != "float") continue;
+            if (!isset($requestArray[$K]) || !is_string($requestArray[$K])) continue;
             $requestArray[$K] = str_replace(",", ".", $requestArray[$K]);
         }
         return $requestArray;
@@ -391,10 +393,20 @@ class MPModel extends Model
     private $propertestConfig;
 
 
+    /**
+     * Валидирует данные запроса по полям тега, чистит их и сохраняет модель.
+     * Тег обязателен: без тега пришлось бы разрешить запись во все поля модели.
+     * Поля NonEditable() не записываются никогда.
+     *
+     * @return true|string true или текст первой ошибки
+     */
     public function ValidateAndFilibleByRequest($data, $tag = null)
     {
+        if ($tag === null || $tag === '') {
+            throw new \InvalidArgumentException("MPModel::ValidateAndFilibleByRequest: tag is required (" . static::class . ")");
+        }
 
-        $cl = get_called_class();
+        $data = is_array($data) ? $data : [];
 
         $validator = $this->GetValidatorRequestInModel($data, $tag);
 
@@ -402,22 +414,43 @@ class MPModel extends Model
             return $validator->errors()->first();
         }
 
-        $dataValidated = $validator->validated();
-
-        foreach ($data as $K => $V) {
-            if (strpos($K, "__") > 0 && is_array($V)) $dataValidated[$K] = $V;
-
-            if (!empty($dataValidated[$K])  && !is_array($V) && !is_bool($V) && !is_int($V) && !is_float($V)) {
-                $dataValidated[$K] = Purifier::clean($dataValidated[$K], ['AutoFormat.AutoParagraph' => false]);
-            }
-        }
-
+        $dataValidated = $this->GetFillDataFromValidator($validator, $data, $tag);
 
         Library\MrpValidateCommon::PropertyFillebleByTag($this, $dataValidated, $tag);
 
-
         $this->save();
         return true;
+    }
+
+    /**
+     * Собирает данные для записи после успешной валидации:
+     *  - всё, что прошло валидатор ($validator->validated());
+     *  - для ListClassGeneric полей текущего тега: только ожидаемые ключи вида  {поле}__{колонка}[]
+     *    со скалярными значениями (произвольные x__y массивы из запроса больше не пролезают);
+     *  - строки с HTML прогоняются через Purifier.
+     */
+    public function GetFillDataFromValidator($validator, array $data, $tag): array
+    {
+        $dataValidated = $validator->validated();
+
+        foreach ($this->GetByTag($tag) as $K => $prop) {
+            if (empty($prop->listClassGeneric)) continue;
+
+            foreach (ReadAttributesConfig::ReadClass($prop->listClassGeneric) as $attrKey => $attrData) {
+                $keyInReq = $prop->name . '__' . $attrKey;
+                if (!isset($data[$keyInReq]) || !is_array($data[$keyInReq])) continue;
+
+                $dataValidated[$keyInReq] = array_values(array_map(function ($v) {
+                    return (is_scalar($v) || $v === null) ? (string)$v : '';
+                }, $data[$keyInReq]));
+            }
+        }
+
+        foreach ($dataValidated as $K => $V) {
+            $dataValidated[$K] = Library\MrpValidateCommon::CleanValue($V);
+        }
+
+        return $dataValidated;
     }
 
     public function PropertyFillebleByTag($data, $tag)

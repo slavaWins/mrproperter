@@ -25,7 +25,7 @@ class ReadAttributesConfig
             foreach ($property->getAttributes() as $attribute) {
 
                 $name = $attribute->getName();
-                $name = basenames($name);
+                $name = class_basename($name);
                 $val = $attribute->getArguments()[0];
                 if(count($attribute->getArguments())>1){
                     $val = $attribute->getArguments();
